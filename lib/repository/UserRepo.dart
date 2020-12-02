@@ -8,7 +8,7 @@ import 'package:maskanismarthome/models/users.dart';
 class Users {
   //Sign In
   Future<LoginData> SignIn(String email, String password) async {
-    Map jsonMap = {"email_address": email, "password": password};
+    Map jsonMap = {"email": email, "password": password};
     var url = DotEnv().env['ROOT_API'] + "/users/login";
 
     HttpClient httpClient = new HttpClient();

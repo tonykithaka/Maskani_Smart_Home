@@ -91,10 +91,11 @@ class _SceneSettingsState extends State<SceneSettings> {
     String SceneStatus = scene.status;
     String StartTime = scene.startTime;
     String Endtime = scene.endTime;
+    String ImageUrl = scene.imageUrl;
     try {
       Dialogs.showLoadingDialog(context, _keyLoader); //invoking login
       CommonData sceneData = await sceneClass.UpdateSceneData(
-          SceneId, SceneName, SceneStatus, StartTime, Endtime);
+          SceneId, SceneName, SceneStatus, StartTime, Endtime, ImageUrl);
 
       if (sceneData.success == 1) {
         print(sceneData.message);
@@ -643,8 +644,6 @@ class _SceneSettingsState extends State<SceneSettings> {
                                                                             value.toString());
                                                                         arguments.status =
                                                                             'Active';
-                                                                        isSwitched =
-                                                                            false;
                                                                       });
                                                                     } else if (value =
                                                                         false) {
@@ -654,10 +653,13 @@ class _SceneSettingsState extends State<SceneSettings> {
                                                                             value.toString());
                                                                         arguments.status =
                                                                             'Inactive';
-                                                                        isSwitched =
-                                                                            true;
                                                                       });
                                                                     }
+                                                                    setState(
+                                                                        () {
+                                                                      isSwitched =
+                                                                          !isSwitched;
+                                                                    });
                                                                   },
                                                                   activeTrackColor:
                                                                       Colors

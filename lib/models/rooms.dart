@@ -27,30 +27,30 @@ class Room {
     this.roomId,
     this.customerId,
     this.roomName,
-    this.deviceId,
-    this.imageId,
+    this.dateCreated,
+    this.imageUrl,
   });
 
   String roomId;
   String customerId;
   String roomName;
-  String deviceId;
-  String imageId;
+  String dateCreated;
+  String imageUrl;
 
   factory Room.fromJson(Map<String, dynamic> json) => Room(
-        roomId: json["room_id"],
-        customerId: json["customer_id"],
-        roomName: json["room_name"],
-        deviceId: json["device_id"],
-        imageId: json["image_id"],
+        customerId: json["id"],
+        roomId: json["roomId"],
+        roomName: json["roomName"],
+        dateCreated: json["dateCreated"],
+        imageUrl: json["imageUrl"],
       );
 
   Map<String, dynamic> toJson() => {
-        "room_id": roomId,
-        "customer_id": customerId,
-        "room_name": roomName,
-        "device_id": deviceId,
-        "image_id": imageId,
+        "id": customerId,
+        "roomId": roomId,
+        "roomName": roomName,
+        "dateCreated": dateCreated,
+        "imageUrl": imageUrl,
       };
 }
 

@@ -134,7 +134,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                   selectionColor: baseColor,
                   handlerColor: Colors.white,
                   onSelectionChange: _updateLabels,
-                  sliderStrokeWidth: 20.0,
+                  sliderStrokeWidth: 15.0,
                   child: Padding(
                     padding: const EdgeInsets.all(42.0),
                     child: Center(

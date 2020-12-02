@@ -60,7 +60,7 @@ class _RoomDetailsState extends State<RoomDetails> {
     var maxWidth = MediaQuery.of(context).size.width;
 
     final Room argument = ModalRoute.of(context).settings.arguments;
-    print(argument.imageId);
+    print(argument.imageUrl);
     return SingleChildScrollView(
       child: Material(
         child: Container(
@@ -75,7 +75,7 @@ class _RoomDetailsState extends State<RoomDetails> {
                 child: Hero(
                   tag: Text('hello' + argument.roomId),
                   child: Image.network(
-                    argument.imageId,
+                    argument.imageUrl,
                     fit: BoxFit.cover,
                   ),
                 ),

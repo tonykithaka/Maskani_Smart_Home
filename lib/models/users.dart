@@ -42,19 +42,19 @@ class Data {
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        userId: json["user_id"],
-        fullName: json["full_name"],
-        emailAddress: json["email_address"],
-        phoneNumber: json["phone_number"],
-        createdDate: json["created_date"],
+        userId: json["id"],
+        fullName: json["fullName"],
+        emailAddress: json["emailAddress"],
+        phoneNumber: json["phoneNumber"],
+        createdDate: json["dateCreated"],
       );
 
   Map<String, dynamic> toJson() => {
-        "user_id": userId,
-        "full_name": fullName,
-        "email_address": emailAddress,
-        "phone_number": phoneNumber,
-        "created_date": createdDate,
+        "id": userId,
+        "fullName": fullName,
+        "emailAddress": emailAddress,
+        "phoneNumber": phoneNumber,
+        "dateCreated": createdDate,
       };
 }
 

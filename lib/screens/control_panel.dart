@@ -2,9 +2,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:intl/intl.dart';
+import 'package:maskanismarthome/models/hubs.dart';
 import 'package:maskanismarthome/models/rooms.dart';
 import 'package:maskanismarthome/models/scenes.dart';
 import 'package:maskanismarthome/repository/RoomsRepo.dart';
+import 'package:maskanismarthome/repository/devices/HubsRepo.dart';
 import 'package:maskanismarthome/repository/scenes/Scenes.dart';
 import 'package:maskanismarthome/screens/scene_settings.dart';
 import 'package:maskanismarthome/style/size_config.dart';
@@ -26,6 +28,9 @@ class _ControlPanelState extends State<ControlPanel> {
   bool isDrawerOpen = false;
   List<Color> _colors = [Color(0xff444444), Color(0xFF292929)];
 
+  final linkHubFormKey = new GlobalKey<FormState>();
+  var hubIdController = TextEditingController();
+
   static bool showBottomDrawer = false;
   var threshold = 100;
 
@@ -35,6 +40,15 @@ class _ControlPanelState extends State<ControlPanel> {
 
   var scenesClass = new Scenes();
   var roomsClass = new Rooms();
+  var hubsClass = new Hubs();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FetchHubDetails();
+    getName('full_name');
+  }
 
   Future<String> getName(String key) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -45,6 +59,21 @@ class _ControlPanelState extends State<ControlPanel> {
     });
 
     return UserName;
+  }
+
+  //Confirm hub is linked to user account
+  FetchHubDetails() async {
+    final SharedPreferences prefs = await _prefs;
+    String user_id = prefs.getString("user_id");
+
+    try {
+      HubData hubData = await hubsClass.FetchHubDetails(user_id);
+      if (hubData.success == 1) {
+        _addHubDialog();
+      }
+    } catch (error) {
+      print(error);
+    }
   }
 
   FetchScenes() async {
@@ -62,9 +91,10 @@ class _ControlPanelState extends State<ControlPanel> {
     final SharedPreferences prefs = await _prefs;
     String user_id = prefs.getString("user_id");
     try {
-      RoomData scenesData = await roomsClass.FetchUserRooms(user_id);
-      print("data is for rooms " + scenesData.toString());
-      return scenesData;
+      print('user id $user_id');
+      RoomData roomsData = await roomsClass.FetchUserRooms(user_id);
+      print("data is for rooms " + roomsData.toString());
+      return roomsData;
     } catch (error) {
       print(error);
     }
@@ -201,13 +231,6 @@ class _ControlPanelState extends State<ControlPanel> {
             return CircularProgressIndicator();
           }
         });
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getName('full_name');
   }
 
   @override
@@ -522,8 +545,14 @@ class _ControlPanelState extends State<ControlPanel> {
                                             builder: (BuildContext context) {
                                               return GestureDetector(
                                                 onTap: () {
-                                                  print(i.roomName);
-                                                  ViewRoom(i);
+                                                  //check room data
+                                                  if (i.roomName ==
+                                                      'ADD ROOM') {
+                                                    print('Viewing room now');
+                                                    _addRoomDialog();
+                                                  } else {
+                                                    ViewRoom(i);
+                                                  }
                                                 },
                                                 child: Stack(
                                                   children: <Widget>[
@@ -561,7 +590,7 @@ class _ControlPanelState extends State<ControlPanel> {
                                                                 Radius.circular(
                                                                     10)),
                                                         child: Image.network(
-                                                          i.imageId,
+                                                          i.imageUrl,
                                                           fit: BoxFit.cover,
                                                         ),
                                                       ),
@@ -671,6 +700,167 @@ class _ControlPanelState extends State<ControlPanel> {
                 ),
               )),
         ],
+      ),
+    );
+  }
+
+  _addRoomDialog() async {
+    await showDialog<String>(
+      context: context,
+      child: new Container(
+        child: new AlertDialog(
+          contentPadding: const EdgeInsets.all(16.0),
+          backgroundColor: Colors.white.withOpacity(0.9),
+          content: new Row(
+            children: <Widget>[
+              new Expanded(
+                child: new TextField(
+                  autofocus: true,
+                  decoration: new InputDecoration(
+                      labelText: 'Full Name', hintText: 'eg. John Smith'),
+                ),
+              )
+            ],
+          ),
+          actions: <Widget>[
+            new FlatButton(
+                child: const Text('CANCEL'),
+                onPressed: () {
+                  Navigator.pop(context);
+                }),
+            new FlatButton(
+                child: const Text('OPEN'),
+                onPressed: () {
+                  Navigator.pop(context);
+                })
+          ],
+        ),
+      ),
+    );
+  }
+
+  _addHubDialog() async {
+    await showDialog<String>(
+      barrierDismissible: false,
+      context: context,
+      child: new Container(
+        padding: EdgeInsets.all(0.0),
+        child: new AlertDialog(
+          contentPadding: EdgeInsets.all(0.0),
+          backgroundColor: Colors.grey[200],
+          content: new Container(
+            height: SizeConfig.blockSizeVertical * 30,
+            padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.blockSizeVertical * 2,
+                    horizontal: SizeConfig.safeBlockHorizontal * 7,
+                  ),
+                  child: Text(
+                    'Please input the Hub Code to link you app and the hub',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[900]),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.safeBlockHorizontal * 7),
+                  child: Form(
+                    key: linkHubFormKey,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 5.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        image: DecorationImage(
+                          fit: BoxFit.fill,
+                          image: AssetImage(
+                            "assets/text_background.png",
+                          ),
+                        ),
+                      ),
+                      child: TextFormField(
+                        controller: hubIdController,
+                        validator: (val) => val.length == 0 || val == ""
+                            ? "Enter your Hub ID"
+                            : null,
+                        keyboardType: TextInputType.emailAddress,
+                        style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15.0),
+                        decoration: InputDecoration(
+                            enabledBorder: const UnderlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.transparent, width: 1.0),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            contentPadding: EdgeInsets.all(15.0),
+                            hintText: 'Hub ID',
+                            hintStyle: TextStyle(
+                                letterSpacing: 0,
+                                fontFamily: 'Montserrat',
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w600),
+                            prefixIcon: const Icon(
+                              Icons.important_devices,
+                              color: Color(0xFF222222),
+                              size: 15.0,
+                            ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 30,
+                              minHeight: 25,
+                            ),
+                            fillColor: Colors.transparent,
+                            filled: true),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                Container(
+                  width: double.maxFinite,
+                  alignment: Alignment.bottomRight,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: FractionallySizedBox(
+                      widthFactor: 0.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10.0),
+                            bottomRight: Radius.circular(4.0)),
+                        child: Container(
+                          padding: EdgeInsets.all(20.0),
+                          color: Color(0xFF222222),
+                          alignment: Alignment.center,
+                          child: Text('Submit'.toUpperCase(),
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'Montserrat',
+                                  letterSpacing: 1.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500)),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

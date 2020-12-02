@@ -2,19 +2,19 @@ import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:maskanismarthome/models/rooms.dart';
+import 'package:maskanismarthome/models/hubs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Rooms {
-  RoomData parseLoginJson(final response) {
+class Hubs {
+  HubData parseLoginJson(final response) {
     final jsonDecoded = json.decode(response);
-    return RoomData.fromJson(jsonDecoded);
+    return HubData.fromJson(jsonDecoded);
   }
 
-  Future<RoomData> FetchUserRooms(String customer_id) async {
+  Future<HubData> FetchHubDetails(String customer_id) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString("token");
-    var url = DotEnv().env['ROOT_API'] + "/users/fetchUserRooms";
+    var url = DotEnv().env['ROOT_API'] + "/users/fetchHubByClientId";
     var response = (await http.post(
       url,
       headers: {
@@ -29,7 +29,7 @@ class Rooms {
 
     if (response.statusCode == 200) {
       final jsonDecoded = json.decode(response.body);
-      return RoomData.fromJson(jsonDecoded);
+      return HubData.fromJson(jsonDecoded);
     } else {
       final responseJson = jsonDecode(response.body);
       return parseLoginJson(responseJson);

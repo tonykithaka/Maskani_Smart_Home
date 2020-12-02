@@ -193,206 +193,22 @@ class _WelcomeState extends State<Welcome> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          TextFormField(
-            controller: fullNameController,
-            keyboardType: TextInputType.text,
-            validator: (value) =>
-                (value.isEmpty) || value == "" ? "Enter your full name" : null,
-            style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w600,
-                fontSize: 15.0),
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-                ),
-                contentPadding: EdgeInsets.only(
-                    top: 15.0, bottom: 15.0, left: 50.0, right: 50.0),
-                hintText: 'FULL NAME',
-                hintStyle: TextStyle(
-                    letterSpacing: 2,
-                    fontSize: 12.0,
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.w600),
-                prefixIcon: const Icon(
-                  Icons.person,
-                  color: Color(0xFF222222),
-                  size: 20.0,
-                ),
-                prefixIconConstraints: BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 25,
-                ),
-                fillColor: Color(0xffEFEFEF),
-                border: new UnderlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 1.0,
-                        style: BorderStyle.none)),
-                filled: true),
-          ),
           Container(
-            height: SizeConfig.blockSizeVertical * 2,
-          ),
-          TextFormField(
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
-            validator: (val) => val.length == 0 || val == ""
-                ? "Enter your email address"
-                : null,
-            style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w600,
-                fontSize: 15.0),
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage(
+                  "assets/text_background.png",
                 ),
-                contentPadding: EdgeInsets.all(15.0),
-                hintText: 'EMAIL ADDRESS',
-                hintStyle: TextStyle(
-                    letterSpacing: 2,
-                    fontFamily: 'Montserrat',
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w600),
-                prefixIcon: const Icon(
-                  Icons.mail,
-                  color: Color(0xFF222222),
-                  size: 15.0,
-                ),
-                prefixIconConstraints: BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 25,
-                ),
-                fillColor: Color(0xffEFEFEF),
-                filled: true),
-          ),
-          Container(
-            height: SizeConfig.blockSizeVertical * 2,
-          ),
-          TextFormField(
-            controller: phoneNumberController,
-            keyboardType: TextInputType.phone,
-            validator: (val) =>
-                val.length == 0 || val == "" ? "Enter your phone number" : null,
-            style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w600,
-                fontSize: 15.0),
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-                ),
-                contentPadding: EdgeInsets.all(15.0),
-                hintText: 'PHONE NUMBER',
-                hintStyle: TextStyle(
-                    letterSpacing: 2,
-                    fontFamily: 'Montserrat',
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w600),
-                prefixIcon: const Icon(
-                  Icons.phone,
-                  color: Color(0xFF222222),
-                  size: 15.0,
-                ),
-                prefixIconConstraints: BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 25,
-                ),
-                fillColor: Color(0xffEFEFEF),
-                filled: true),
-          ),
-          Container(
-            height: SizeConfig.blockSizeVertical * 2,
-          ),
-          TextFormField(
-            controller: passwordController,
-            obscureText: true,
-            keyboardType: TextInputType.text,
-            validator: (val) =>
-                val.length == 0 || val == "" ? "Enter your password" : null,
-            style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w600,
-                fontSize: 15.0),
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-                ),
-                contentPadding: EdgeInsets.all(15.0),
-                hintText: 'PASSWORD',
-                hintStyle: TextStyle(
-                    letterSpacing: 2,
-                    fontFamily: 'Montserrat',
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w600),
-                prefixIcon: const Icon(
-                  Icons.lock,
-                  color: Color(0xFF222222),
-                  size: 15.0,
-                ),
-                prefixIconConstraints: BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 25,
-                ),
-                fillColor: Color(0xffEFEFEF),
-                filled: true),
-          ),
-          Container(
-            height: SizeConfig.blockSizeVertical * 2,
-          ),
-          TextFormField(
-            controller: passwordRepeatController,
-            obscureText: true,
-            keyboardType: TextInputType.text,
-            validator: (val) =>
-                val.length == 0 || val == "" ? "Repeat your password" : null,
-            style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w600,
-                fontSize: 15.0),
-            decoration: InputDecoration(
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-                ),
-                contentPadding: EdgeInsets.all(15.0),
-                hintText: 'REPEAT PASSWORD',
-                hintStyle: TextStyle(
-                    letterSpacing: 2,
-                    fontFamily: 'Montserrat',
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w600),
-                prefixIcon: const Icon(
-                  Icons.lock,
-                  color: Color(0xFF222222),
-                  size: 15.0,
-                ),
-                prefixIconConstraints: BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 25,
-                ),
-                fillColor: Color(0xffEFEFEF),
-                filled: true),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //Sign up form
-
-  Widget _LoginForm() {
-    return Form(
-        key: loginUserFormKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TextFormField(
-              controller: loginEmailAddressController,
-              validator: (val) => val.length == 0 || val == ""
-                  ? "Enter your email address"
+              ),
+            ),
+            child: TextFormField(
+              controller: fullNameController,
+              keyboardType: TextInputType.text,
+              validator: (value) => (value.isEmpty) || value == ""
+                  ? "Enter your full name"
                   : null,
-              keyboardType: TextInputType.emailAddress,
               style: TextStyle(
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.w600,
@@ -400,17 +216,77 @@ class _WelcomeState extends State<Welcome> {
               decoration: InputDecoration(
                   enabledBorder: const UnderlineInputBorder(
                     borderSide:
-                        const BorderSide(color: Colors.grey, width: 1.0),
+                        const BorderSide(color: Colors.transparent, width: 1.0),
                   ),
-                  contentPadding: EdgeInsets.all(15.0),
-                  hintText: 'EMAIL ADDRESS',
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  contentPadding: EdgeInsets.only(
+                      top: 15.0, bottom: 15.0, left: 50.0, right: 50.0),
+                  hintText: 'Full Name',
                   hintStyle: TextStyle(
-                      letterSpacing: 2,
+                      letterSpacing: 0,
+                      fontSize: 14.0,
                       fontFamily: 'Montserrat',
-                      fontSize: 12.0,
                       fontWeight: FontWeight.w600),
                   prefixIcon: const Icon(
-                    Icons.email,
+                    Icons.person,
+                    color: Color(0xFF222222),
+                    size: 20.0,
+                  ),
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: 30,
+                    minHeight: 25,
+                  ),
+                  // fillColor: Color(0xffEFEFEF),
+                  border: new UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Colors.white,
+                          width: 1.0,
+                          style: BorderStyle.none)),
+                  filled: true),
+            ),
+          ),
+          Container(
+            height: SizeConfig.blockSizeVertical * 2,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage(
+                  "assets/text_background.png",
+                ),
+              ),
+            ),
+            child: TextFormField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              validator: (val) => val.length == 0 || val == ""
+                  ? "Enter your email address"
+                  : null,
+              style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15.0),
+              decoration: InputDecoration(
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.transparent, width: 1.0),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  contentPadding: EdgeInsets.all(15.0),
+                  hintText: 'Email Address',
+                  hintStyle: TextStyle(
+                      letterSpacing: 0,
+                      fontFamily: 'Montserrat',
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600),
+                  prefixIcon: const Icon(
+                    Icons.mail,
                     color: Color(0xFF222222),
                     size: 15.0,
                   ),
@@ -418,19 +294,29 @@ class _WelcomeState extends State<Welcome> {
                     minWidth: 30,
                     minHeight: 25,
                   ),
-                  fillColor: Colors.transparent,
+                  fillColor: Color(0xffEFEFEF),
                   filled: true),
             ),
-            Container(
-              height: 10,
+          ),
+          Container(
+            height: SizeConfig.blockSizeVertical * 2,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage(
+                  "assets/text_background.png",
+                ),
+              ),
             ),
-            TextFormField(
-              controller: loginPasswordController,
+            child: TextFormField(
+              controller: phoneNumberController,
+              keyboardType: TextInputType.phone,
               validator: (val) => val.length == 0 || val == ""
-                  ? "Enter your email address"
+                  ? "Enter your phone number"
                   : null,
-              obscureText: true,
-              keyboardType: TextInputType.text,
               style: TextStyle(
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.w600,
@@ -438,14 +324,68 @@ class _WelcomeState extends State<Welcome> {
               decoration: InputDecoration(
                   enabledBorder: const UnderlineInputBorder(
                     borderSide:
-                        const BorderSide(color: Colors.grey, width: 1.0),
+                        const BorderSide(color: Colors.transparent, width: 1.0),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
                   ),
                   contentPadding: EdgeInsets.all(15.0),
-                  hintText: 'PASSWORD',
+                  hintText: 'Phone Number',
                   hintStyle: TextStyle(
-                      letterSpacing: 2,
+                      letterSpacing: 0,
                       fontFamily: 'Montserrat',
-                      fontSize: 12.0,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600),
+                  prefixIcon: const Icon(
+                    Icons.phone,
+                    color: Color(0xFF222222),
+                    size: 15.0,
+                  ),
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: 30,
+                    minHeight: 25,
+                  ),
+                  fillColor: Color(0xffEFEFEF),
+                  filled: true),
+            ),
+          ),
+          Container(
+            height: SizeConfig.blockSizeVertical * 2,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage(
+                  "assets/text_background.png",
+                ),
+              ),
+            ),
+            child: TextFormField(
+              controller: passwordController,
+              obscureText: true,
+              keyboardType: TextInputType.text,
+              validator: (val) =>
+                  val.length == 0 || val == "" ? "Enter your password" : null,
+              style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15.0),
+              decoration: InputDecoration(
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.transparent, width: 1.0),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  contentPadding: EdgeInsets.all(15.0),
+                  hintText: 'Password',
+                  hintStyle: TextStyle(
+                      letterSpacing: 0,
+                      fontFamily: 'Montserrat',
+                      fontSize: 14.0,
                       fontWeight: FontWeight.w600),
                   prefixIcon: const Icon(
                     Icons.lock,
@@ -456,9 +396,229 @@ class _WelcomeState extends State<Welcome> {
                     minWidth: 30,
                     minHeight: 25,
                   ),
-                  fillColor: Colors.transparent,
+                  fillColor: Color(0xffEFEFEF),
                   filled: true),
             ),
+          ),
+          Container(
+            height: SizeConfig.blockSizeVertical * 2,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: AssetImage(
+                  "assets/text_background.png",
+                ),
+              ),
+            ),
+            child: TextFormField(
+              controller: passwordRepeatController,
+              obscureText: true,
+              keyboardType: TextInputType.text,
+              validator: (val) =>
+                  val.length == 0 || val == "" ? "Repeat your password" : null,
+              style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15.0),
+              decoration: InputDecoration(
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.transparent, width: 1.0),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                  ),
+                  contentPadding: EdgeInsets.all(15.0),
+                  hintText: 'Repeat Password',
+                  hintStyle: TextStyle(
+                      letterSpacing: 0,
+                      fontFamily: 'Montserrat',
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600),
+                  prefixIcon: const Icon(
+                    Icons.lock,
+                    color: Color(0xFF222222),
+                    size: 15.0,
+                  ),
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: 30,
+                    minHeight: 25,
+                  ),
+                  fillColor: Color(0xffEFEFEF),
+                  filled: true),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //Sign up form
+
+  Widget _LoginForm() {
+    bool checkedValue = false;
+    return Form(
+        key: loginUserFormKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              height: 50,
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 5.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                image: DecorationImage(
+                  fit: BoxFit.fill,
+                  image: AssetImage(
+                    "assets/text_background.png",
+                  ),
+                ),
+              ),
+              child: TextFormField(
+                controller: loginEmailAddressController,
+                validator: (val) => val.length == 0 || val == ""
+                    ? "Enter your email address"
+                    : null,
+                keyboardType: TextInputType.emailAddress,
+                style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15.0),
+                decoration: InputDecoration(
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: Colors.transparent, width: 1.0),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    contentPadding: EdgeInsets.all(15.0),
+                    hintText: 'Email Address',
+                    hintStyle: TextStyle(
+                        letterSpacing: 0,
+                        fontFamily: 'Montserrat',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600),
+                    prefixIcon: const Icon(
+                      Icons.email,
+                      color: Color(0xFF222222),
+                      size: 15.0,
+                    ),
+                    prefixIconConstraints: BoxConstraints(
+                      minWidth: 30,
+                      minHeight: 25,
+                    ),
+                    fillColor: Colors.transparent,
+                    filled: true),
+              ),
+            ),
+            Container(
+              height: 10,
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 5.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                image: DecorationImage(
+                  fit: BoxFit.fill,
+                  image: AssetImage(
+                    "assets/text_background.png",
+                  ),
+                ),
+              ),
+              child: TextFormField(
+                controller: loginPasswordController,
+                validator: (val) =>
+                    val.length == 0 || val == "" ? "Enter your password" : null,
+                obscureText: true,
+                keyboardType: TextInputType.text,
+                style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15.0),
+                decoration: InputDecoration(
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: const BorderSide(
+                          color: Colors.transparent, width: 1.0),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    contentPadding: EdgeInsets.all(15.0),
+                    hintText: 'Password',
+                    hintStyle: TextStyle(
+                        letterSpacing: 0,
+                        fontFamily: 'Montserrat',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600),
+                    prefixIcon: const Icon(
+                      Icons.lock,
+                      color: Color(0xFF222222),
+                      size: 15.0,
+                    ),
+                    prefixIconConstraints: BoxConstraints(
+                      minWidth: 30,
+                      minHeight: 25,
+                    ),
+                    fillColor: Colors.transparent,
+                    filled: true),
+              ),
+            ),
+            SizedBox(
+              height: 15.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 20.0,
+                      width: 20.0,
+                      child: Checkbox(
+                        value: checkedValue,
+                        onChanged: (newValue) {
+                          setState(() {
+                            checkedValue = newValue;
+                          });
+                        },
+                        // controlAffinity:
+                        //     ListTileControlAffinity.leading, //  <-- leading Checkbox
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5.0,
+                    ),
+                    Text(
+                      'Stay signed in',
+                      style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700),
+                    )
+                  ],
+                ),
+                InkWell(
+                  onTap: () {
+                    print('forgot password');
+                  },
+                  child: Container(
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                )
+              ],
+            )
           ],
         ));
   }
@@ -535,54 +695,59 @@ class _WelcomeState extends State<Welcome> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            InkWell(
-                              child: Padding(
-                                child: Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: defaultColor1,
-                                      letterSpacing: 0),
+                        Container(
+                          margin: EdgeInsets.only(
+                            right: SizeConfig.blockSizeHorizontal * 0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              InkWell(
+                                child: Padding(
+                                  child: Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w600,
+                                        color: defaultColor1,
+                                        letterSpacing: 0),
+                                  ),
+                                  padding: EdgeInsets.only(
+                                      left: 10, right: 10, bottom: 5),
                                 ),
-                                padding: EdgeInsets.only(
-                                    left: 10, right: 10, bottom: 5),
+                                onTap: () =>
+                                    buttonCarouselController.previousPage(
+                                        duration: Duration(milliseconds: 500),
+                                        curve: Curves.decelerate),
                               ),
-                              onTap: () =>
-                                  buttonCarouselController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.decelerate),
-                            ),
-                            Container(
-                              height: 30.0,
-                              width: 0,
-                              color: Colors.grey,
-                              margin: EdgeInsets.only(
-                                  left: 10.0, right: 10.0, bottom: 5),
-                            ),
-                            InkWell(
-                              child: Padding(
-                                child: Text(
-                                  "Login  ",
-                                  style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w600,
-                                      color: defaultColor2,
-                                      letterSpacing: 0),
+                              Container(
+                                height: 15.0,
+                                width: 1.5,
+                                color: Colors.grey,
+                                margin: EdgeInsets.only(
+                                    left: 10.0, right: 10.0, bottom: 5),
+                              ),
+                              InkWell(
+                                child: Padding(
+                                  child: Text(
+                                    "Login  ",
+                                    style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w600,
+                                        color: defaultColor2,
+                                        letterSpacing: 0),
+                                  ),
+                                  padding: EdgeInsets.only(
+                                      left: 10, right: 10, bottom: 5),
                                 ),
-                                padding: EdgeInsets.only(
-                                    left: 10, right: 10, bottom: 5),
+                                onTap: () => buttonCarouselController.nextPage(
+                                    duration: Duration(milliseconds: 500),
+                                    curve: Curves.decelerate),
                               ),
-                              onTap: () => buttonCarouselController.nextPage(
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.decelerate),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         Container(
                           height: 10.0,
@@ -603,6 +768,11 @@ class _WelcomeState extends State<Welcome> {
                                 topRight: Radius.circular(10),
                                 bottomLeft: Radius.circular(10),
                                 bottomRight: Radius.circular(10)),
+                            gradient: LinearGradient(
+                                colors: [Color(0xFFFFFFFF), Color(0xFFd9d9d9)],
+                                stops: [0.0, 1.0],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,

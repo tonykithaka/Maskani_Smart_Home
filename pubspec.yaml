@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.8.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -84,6 +84,7 @@ flutter:
     - assets/lights_bg.png
     - assets/window_bg.png
     - assets/Power_Outlets_bg.png
+    - assets/text_background.png
     - .env
 #     - images/a_dot_ham.jpeg
 

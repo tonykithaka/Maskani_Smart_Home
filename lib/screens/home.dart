@@ -31,6 +31,7 @@ class _HomeState extends State<Home> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String name = prefs.getString(key);
+    print(name);
     setState(() {
       UserName = name.split(' ')[0];
     });

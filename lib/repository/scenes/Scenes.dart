@@ -15,7 +15,7 @@ class Scenes {
   Future<ScenesData> FetchUserScenes(String customer_id) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString("token");
-    var url = DotEnv().env['ROOT_API'] + "/users/fetchCustomerScenes";
+    var url = DotEnv().env['ROOT_API'] + "/users/fetchUserScenes";
     var response = (await http.post(
       url,
       headers: {
@@ -24,7 +24,7 @@ class Scenes {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, String>{
-        'customer_id': customer_id,
+        'id': customer_id,
       }),
     ));
 
@@ -38,12 +38,17 @@ class Scenes {
     }
   }
 
-  Future<CommonData> UpdateSceneData(String SceneId, String SceneName,
-      String SceneStatus, String StartTime, String EndTime) async {
+  Future<CommonData> UpdateSceneData(
+      String SceneId,
+      String SceneName,
+      String SceneStatus,
+      String StartTime,
+      String EndTime,
+      String imageUrl) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString("token");
     final String user_id = prefs.getString("user_id");
-    var url = DotEnv().env['ROOT_API'] + "/users/UpdateSceneData";
+    var url = DotEnv().env['ROOT_API'] + "/users/updateUserScenes";
     var response = (await http.post(
       url,
       headers: {
@@ -52,12 +57,13 @@ class Scenes {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, String>{
-        'customer_id': user_id,
-        'scene_id': SceneId,
-        'scene_name': SceneName,
-        'scene_status': SceneStatus,
-        'start_time': StartTime,
-        'end_time': EndTime
+        'id': user_id,
+        'sceneId': SceneId,
+        'sceneName': SceneName,
+        'sceneStatus': SceneStatus,
+        'startTime': StartTime,
+        'endTime': EndTime,
+        'imageUrl': imageUrl
       }),
     ));
 

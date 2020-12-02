@@ -42,22 +42,22 @@ class Scene {
   String status;
 
   factory Scene.fromJson(Map<String, dynamic> json) => Scene(
-        customerId: json["customer_id"],
-        sceneId: json["scene_id"],
-        sceneName: json["scene_name"],
-        imageUrl: json["image_url"],
-        startTime: json["start_time"],
-        endTime: json["end_time"],
-        status: json["status"],
+        customerId: json["id"],
+        sceneId: json["sceneId"],
+        sceneName: json["sceneName"],
+        imageUrl: json["imageUrl"],
+        startTime: json["startTime"],
+        endTime: json["endTime"],
+        status: json["sceneStatus"],
       );
 
   Map<String, dynamic> toJson() => {
-        "customer_id": customerId,
-        "scene_id": sceneId,
-        "scene_name": sceneName,
-        "image_url": imageUrl,
-        "start_time": startTime,
-        "end_time": endTime,
-        "status": status,
+        "id": customerId,
+        "sceneId": sceneId,
+        "sceneName": sceneName,
+        "imageUrl": imageUrl,
+        "startTime": startTime,
+        "endTime": endTime,
+        "sceneStatus": status,
       };
 }
