@@ -468,9 +468,6 @@ class _SceneSettingsState extends State<SceneSettings> {
   Widget build(BuildContext context) {
     final Scene arguments = _sceneData;
     if (arguments != null) {
-      var sceneStatus = arguments.status;
-      var sceneName = arguments.sceneName;
-      var sceneId = arguments.sceneId;
       bool isSwitched = (arguments.status == 'Inactive') ? false : true;
       return Scaffold(
         body: SingleChildScrollView(

@@ -5,12 +5,14 @@ import 'package:intl/intl.dart';
 import 'package:maskanismarthome/models/hubs.dart';
 import 'package:maskanismarthome/models/rooms.dart';
 import 'package:maskanismarthome/models/scenes.dart';
+import 'package:maskanismarthome/repository/Dialogs.dart';
 import 'package:maskanismarthome/repository/RoomsRepo.dart';
 import 'package:maskanismarthome/repository/devices/HubsRepo.dart';
 import 'package:maskanismarthome/repository/scenes/Scenes.dart';
 import 'package:maskanismarthome/screens/scene_settings.dart';
 import 'package:maskanismarthome/style/size_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sweetalert/sweetalert.dart';
 
 class ControlPanel extends StatefulWidget {
   @override
@@ -30,6 +32,7 @@ class _ControlPanelState extends State<ControlPanel> {
 
   final linkHubFormKey = new GlobalKey<FormState>();
   var hubIdController = TextEditingController();
+  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
   static bool showBottomDrawer = false;
   var threshold = 100;
@@ -37,6 +40,9 @@ class _ControlPanelState extends State<ControlPanel> {
   String UserName;
   String FieldName;
   String RoomTag;
+  String hubId;
+  String user_id;
+  String final_message;
 
   var scenesClass = new Scenes();
   var roomsClass = new Rooms();
@@ -46,7 +52,7 @@ class _ControlPanelState extends State<ControlPanel> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    FetchHubDetails();
+    this.FetchHubDetails();
     getName('full_name');
   }
 
@@ -65,11 +71,48 @@ class _ControlPanelState extends State<ControlPanel> {
   FetchHubDetails() async {
     final SharedPreferences prefs = await _prefs;
     String user_id = prefs.getString("user_id");
-
     try {
       HubData hubData = await hubsClass.FetchHubDetails(user_id);
-      if (hubData.success == 1) {
+      if (hubData.success == 0) {
+        var test = hubData.success;
+        print('this message is $test');
         _addHubDialog();
+      } else {}
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  // Validate and link user with hub
+  validateHubRegistration(BuildContext context) async {
+    final SharedPreferences prefs = await _prefs;
+    if (hubIdController.text.isEmpty) {
+      print('No validation');
+    } else {
+      print('Validating login form...');
+      if (linkHubFormKey.currentState.validate()) {
+        print("Validation successfull");
+        linkHubFormKey.currentState.save();
+        this.hubId = hubIdController.text;
+        String userId = prefs.getString("user_id");
+
+        LinkHubWithUser(context, userId, hubId);
+      }
+    }
+  }
+
+  LinkHubWithUser(BuildContext context, String userId, String hubId) async {
+    final SharedPreferences prefs = await _prefs;
+    try {
+      Dialogs.showLoadingDialog(context, _keyLoader); //invoking login
+      HubData hubData = await hubsClass.LinkHubWithUser(userId, hubId);
+      if (hubData.success == 1) {
+        Navigator.pop(context);
+        Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
+        SweetAlert.show(context,
+            subtitle: hubData.message, style: SweetAlertStyle.success);
+      } else {
+        print(hubData.message);
       }
     } catch (error) {
       print(error);
@@ -91,7 +134,6 @@ class _ControlPanelState extends State<ControlPanel> {
     final SharedPreferences prefs = await _prefs;
     String user_id = prefs.getString("user_id");
     try {
-      print('user id $user_id');
       RoomData roomsData = await roomsClass.FetchUserRooms(user_id);
       print("data is for rooms " + roomsData.toString());
       return roomsData;
@@ -101,24 +143,26 @@ class _ControlPanelState extends State<ControlPanel> {
   }
 
   ViewScene(Scene sceneData) async {
-//    Navigator.pushNamed(context, "/scene_setting", arguments: sceneData);
-
-    Navigator.of(context).push(PageRouteBuilder(
-      fullscreenDialog: true,
-      transitionDuration: Duration(milliseconds: 500),
-      pageBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation) {
-        return SceneSettings(sceneData: sceneData);
-      },
-      transitionsBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation, Widget child) {
-        return FadeTransition(
-          opacity:
-              animation, // CurvedAnimation(parent: animation, curve: Curves.elasticInOut),
-          child: child,
-        );
-      },
-    ));
+    if (sceneData.status == 'No state') {
+      print('Set up room');
+    } else {
+      Navigator.of(context).push(PageRouteBuilder(
+        fullscreenDialog: true,
+        transitionDuration: Duration(milliseconds: 500),
+        pageBuilder: (BuildContext context, Animation<double> animation,
+            Animation<double> secondaryAnimation) {
+          return SceneSettings(sceneData: sceneData);
+        },
+        transitionsBuilder: (BuildContext context, Animation<double> animation,
+            Animation<double> secondaryAnimation, Widget child) {
+          return FadeTransition(
+            opacity:
+                animation, // CurvedAnimation(parent: animation, curve: Curves.elasticInOut),
+            child: child,
+          );
+        },
+      ));
+    }
   }
 
   ViewRoom(Room roomData) async {
@@ -833,7 +877,135 @@ class _ControlPanelState extends State<ControlPanel> {
                   alignment: Alignment.bottomRight,
                   child: InkWell(
                     onTap: () {
-                      Navigator.pop(context);
+                      validateHubRegistration(context);
+                      // Navigator.pop(context);
+                    },
+                    child: FractionallySizedBox(
+                      widthFactor: 0.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10.0),
+                            bottomRight: Radius.circular(4.0)),
+                        child: Container(
+                          padding: EdgeInsets.all(20.0),
+                          color: Color(0xFF222222),
+                          alignment: Alignment.center,
+                          child: Text('Submit'.toUpperCase(),
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'Montserrat',
+                                  letterSpacing: 1.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500)),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  _addSceneDialog() async {
+    await showDialog<String>(
+      barrierDismissible: false,
+      context: context,
+      child: new Container(
+        padding: EdgeInsets.all(0.0),
+        child: new AlertDialog(
+          contentPadding: EdgeInsets.all(0.0),
+          backgroundColor: Colors.grey[200],
+          content: new Container(
+            height: SizeConfig.blockSizeVertical * 30,
+            padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.blockSizeVertical * 2,
+                    horizontal: SizeConfig.safeBlockHorizontal * 7,
+                  ),
+                  child: Text(
+                    'Please input the Hub Code to link you app and the hub',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[900]),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.safeBlockHorizontal * 7),
+                  child: Form(
+                    key: linkHubFormKey,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 5.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        image: DecorationImage(
+                          fit: BoxFit.fill,
+                          image: AssetImage(
+                            "assets/text_background.png",
+                          ),
+                        ),
+                      ),
+                      child: TextFormField(
+                        controller: hubIdController,
+                        validator: (val) => val.length == 0 || val == ""
+                            ? "Enter your Hub ID"
+                            : null,
+                        keyboardType: TextInputType.emailAddress,
+                        style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15.0),
+                        decoration: InputDecoration(
+                            enabledBorder: const UnderlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.transparent, width: 1.0),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                            contentPadding: EdgeInsets.all(15.0),
+                            hintText: 'Hub ID',
+                            hintStyle: TextStyle(
+                                letterSpacing: 0,
+                                fontFamily: 'Montserrat',
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w600),
+                            prefixIcon: const Icon(
+                              Icons.important_devices,
+                              color: Color(0xFF222222),
+                              size: 15.0,
+                            ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 30,
+                              minHeight: 25,
+                            ),
+                            fillColor: Colors.transparent,
+                            filled: true),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                Container(
+                  width: double.maxFinite,
+                  alignment: Alignment.bottomRight,
+                  child: InkWell(
+                    onTap: () {
+                      validateHubRegistration(context);
+                      // Navigator.pop(context);
                     },
                     child: FractionallySizedBox(
                       widthFactor: 0.5,

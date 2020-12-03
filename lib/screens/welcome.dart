@@ -60,7 +60,7 @@ class _WelcomeState extends State<Welcome> {
     // TODO: implement initState
     super.initState();
     this.buttonLabel = 'Sign Up';
-    this.buttonMethod;
+    // this.buttonMethod;
     this.final_message = "please wait...";
   }
 
@@ -125,7 +125,9 @@ class _WelcomeState extends State<Welcome> {
           Navigator.pushReplacementNamed(context, "/home");
         }
       } else {
-        this.final_message = signupData.message;
+        Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
+        SweetAlert.show(context,
+            subtitle: signupData.message, style: SweetAlertStyle.error);
       }
     } catch (error) {
       print(error);

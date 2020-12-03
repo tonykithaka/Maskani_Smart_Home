@@ -30,10 +30,10 @@ class Users {
   Future<SignUpData> SignUp(String full_name, String email, String phone_number,
       String password) async {
     Map jsonMap = {
-      "full_name": full_name,
-      "email_address": email,
+      "fullName": full_name,
+      "email": email,
       "password": password,
-      "phone_number": phone_number
+      "phoneNumber": phone_number
     };
     var url = DotEnv().env['ROOT_API'] + "/users/createUser";
 
