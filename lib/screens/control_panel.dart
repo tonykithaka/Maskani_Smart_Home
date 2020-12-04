@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:maskanismarthome/models/common.dart';
 import 'package:maskanismarthome/models/hubs.dart';
 import 'package:maskanismarthome/models/rooms.dart';
 import 'package:maskanismarthome/models/scenes.dart';
@@ -31,7 +35,13 @@ class _ControlPanelState extends State<ControlPanel> {
   List<Color> _colors = [Color(0xff444444), Color(0xFF292929)];
 
   final linkHubFormKey = new GlobalKey<FormState>();
+  final sceneDetailsFormKey = new GlobalKey<FormState>();
+  final roomDetailsFormKey = new GlobalKey<FormState>();
+
   var hubIdController = TextEditingController();
+  var sceneNameController = TextEditingController();
+  var roomNameController = TextEditingController();
+
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
   static bool showBottomDrawer = false;
@@ -43,6 +53,8 @@ class _ControlPanelState extends State<ControlPanel> {
   String hubId;
   String user_id;
   String final_message;
+  String roomName;
+  String sceneName;
 
   var scenesClass = new Scenes();
   var roomsClass = new Rooms();
@@ -101,6 +113,8 @@ class _ControlPanelState extends State<ControlPanel> {
     }
   }
 
+  //Pick sceneimage
+
   LinkHubWithUser(BuildContext context, String userId, String hubId) async {
     final SharedPreferences prefs = await _prefs;
     try {
@@ -135,7 +149,6 @@ class _ControlPanelState extends State<ControlPanel> {
     String user_id = prefs.getString("user_id");
     try {
       RoomData roomsData = await roomsClass.FetchUserRooms(user_id);
-      print("data is for rooms " + roomsData.toString());
       return roomsData;
     } catch (error) {
       print(error);
@@ -144,7 +157,7 @@ class _ControlPanelState extends State<ControlPanel> {
 
   ViewScene(Scene sceneData) async {
     if (sceneData.status == 'No state') {
-      print('Set up room');
+      _dialogCall(context);
     } else {
       Navigator.of(context).push(PageRouteBuilder(
         fullscreenDialog: true,
@@ -209,7 +222,7 @@ class _ControlPanelState extends State<ControlPanel> {
                                 tag: Text('hello' + item.sceneId),
                                 child: Image.network(
                                   item.imageUrl,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.fill,
                                 ),
                               ),
                             ),
@@ -708,8 +721,6 @@ class _ControlPanelState extends State<ControlPanel> {
                                       ),
                                     );
                                   } else {
-                                    // We can show the loading view until the data comes back.
-                                    debugPrint('Step 1, build loading widget');
                                     return CircularProgressIndicator();
                                   }
                                 },
@@ -727,7 +738,9 @@ class _ControlPanelState extends State<ControlPanel> {
                                         new BorderRadius.circular(10.0),
                                   ),
                                   color: Color(0xFF191919),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    _addSceneDialog();
+                                  },
                                   child: Text('ADD ROOM',
                                       style: TextStyle(
                                           fontSize: 15,
@@ -750,34 +763,236 @@ class _ControlPanelState extends State<ControlPanel> {
 
   _addRoomDialog() async {
     await showDialog<String>(
+      barrierDismissible: false,
       context: context,
       child: new Container(
+        padding: EdgeInsets.all(0.0),
         child: new AlertDialog(
-          contentPadding: const EdgeInsets.all(16.0),
-          backgroundColor: Colors.white.withOpacity(0.9),
-          content: new Row(
-            children: <Widget>[
-              new Expanded(
-                child: new TextField(
-                  autofocus: true,
-                  decoration: new InputDecoration(
-                      labelText: 'Full Name', hintText: 'eg. John Smith'),
-                ),
-              )
-            ],
+          contentPadding: EdgeInsets.all(0.0),
+          backgroundColor: Colors.grey[200],
+          content: SingleChildScrollView(
+            child: new Container(
+              height: SizeConfig.blockSizeVertical * 50,
+              padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: SizeConfig.blockSizeVertical * 2,
+                      horizontal: SizeConfig.safeBlockHorizontal * 7,
+                    ),
+                    child: Text(
+                      "Please enter Room Name e.g. 'Living Room' and attach your favourite room image.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey[900]),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.safeBlockHorizontal * 7),
+                    child: Form(
+                      key: roomDetailsFormKey,
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)),
+                              image: DecorationImage(
+                                fit: BoxFit.fill,
+                                image: AssetImage(
+                                  "assets/text_background.png",
+                                ),
+                              ),
+                            ),
+                            child: TextFormField(
+                              controller: roomNameController,
+                              validator: (val) => val.length == 0 || val == ""
+                                  ? "Enter your Room Name e.g, 'Living Room'"
+                                  : null,
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15.0),
+                              decoration: InputDecoration(
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Colors.transparent, width: 1.0),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.transparent),
+                                  ),
+                                  contentPadding: EdgeInsets.all(15.0),
+                                  hintText: "Enter Room Name",
+                                  hintStyle: TextStyle(
+                                      letterSpacing: 0,
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w600),
+                                  prefixIcon: const Icon(
+                                    Icons.important_devices,
+                                    color: Color(0xFF222222),
+                                    size: 15.0,
+                                  ),
+                                  prefixIconConstraints: BoxConstraints(
+                                    minWidth: 30,
+                                    minHeight: 25,
+                                  ),
+                                  fillColor: Colors.transparent,
+                                  filled: true),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 5.0),
+                                child: InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 5.0),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          alignment: Alignment.center,
+                                          width:
+                                              SizeConfig.blockSizeHorizontal *
+                                                  12,
+                                          height:
+                                              SizeConfig.blockSizeHorizontal *
+                                                  12,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(8.0)),
+                                              border: Border.all(
+                                                  width: 2.0,
+                                                  color: Color(0xFF222222))),
+                                          child: Icon(Icons.camera_alt,
+                                              size: 20,
+                                              color: Color(0xFF222222)),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              SizeConfig.blockSizeHorizontal *
+                                                  5,
+                                        ),
+                                        Text(
+                                          'Take Photo',
+                                          style: TextStyle(
+                                              fontFamily: 'Montserrat',
+                                              fontSize: 13.0,
+                                              color: Color(0xff222222)
+                                                  .withOpacity(0.9),
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 5.0),
+                                child: InkWell(
+                                  onTap: () {},
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 5.0),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          alignment: Alignment.center,
+                                          width:
+                                              SizeConfig.blockSizeHorizontal *
+                                                  12,
+                                          height:
+                                              SizeConfig.blockSizeHorizontal *
+                                                  12,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(8.0)),
+                                              border: Border.all(
+                                                  width: 2.0,
+                                                  color: Color(0xFF222222))),
+                                          child: Icon(Icons.image,
+                                              size: 20,
+                                              color: Color(0xFF222222)),
+                                        ),
+                                        SizedBox(
+                                          height:
+                                              SizeConfig.blockSizeHorizontal *
+                                                  5,
+                                        ),
+                                        Text(
+                                          'Attach Photo',
+                                          style: TextStyle(
+                                              fontFamily: 'Montserrat',
+                                              fontSize: 13.0,
+                                              color: Color(0xff222222)
+                                                  .withOpacity(0.9),
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20.0,
+                  ),
+                  Container(
+                    width: double.maxFinite,
+                    alignment: Alignment.bottomRight,
+                    child: InkWell(
+                      onTap: () {
+                        validateHubRegistration(context);
+                        // Navigator.pop(context);
+                      },
+                      child: FractionallySizedBox(
+                        widthFactor: 0.5,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(4.0)),
+                          child: Container(
+                            padding: EdgeInsets.all(20.0),
+                            color: Color(0xFF222222),
+                            alignment: Alignment.center,
+                            child: Text('Submit'.toUpperCase(),
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: 'Montserrat',
+                                    letterSpacing: 1.0,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
           ),
-          actions: <Widget>[
-            new FlatButton(
-                child: const Text('CANCEL'),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
-            new FlatButton(
-                child: const Text('OPEN'),
-                onPressed: () {
-                  Navigator.pop(context);
-                })
-          ],
         ),
       ),
     );
@@ -878,6 +1093,288 @@ class _ControlPanelState extends State<ControlPanel> {
                   child: InkWell(
                     onTap: () {
                       validateHubRegistration(context);
+                    },
+                    child: FractionallySizedBox(
+                      widthFactor: 0.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10.0),
+                            bottomRight: Radius.circular(4.0)),
+                        child: Container(
+                          padding: EdgeInsets.all(20.0),
+                          color: Color(0xFF222222),
+                          alignment: Alignment.center,
+                          child: Text('Submit'.toUpperCase(),
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'Montserrat',
+                                  letterSpacing: 1.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500)),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _dialogCall(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return _addSceneDialog();
+        });
+  }
+}
+
+class _addSceneDialog extends StatefulWidget {
+  @override
+  __addSceneDialogState createState() => __addSceneDialogState();
+}
+
+class __addSceneDialogState extends State<_addSceneDialog> {
+  File _sceneImage;
+  bool checkImage = false;
+
+  String roomName;
+  String sceneName;
+
+  final linkHubFormKey = new GlobalKey<FormState>();
+  final sceneDetailsFormKey = new GlobalKey<FormState>();
+  final roomDetailsFormKey = new GlobalKey<FormState>();
+
+  var hubIdController = TextEditingController();
+  var sceneNameController = TextEditingController();
+  var roomNameController = TextEditingController();
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  var scenesClass = new Scenes();
+  var roomsClass = new Rooms();
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      padding: EdgeInsets.all(0.0),
+      child: new AlertDialog(
+        contentPadding: EdgeInsets.all(0.0),
+        backgroundColor: Colors.grey[200],
+        content: SingleChildScrollView(
+          child: new Container(
+            height: this.checkImage
+                ? SizeConfig.blockSizeVertical * 78
+                : SizeConfig.blockSizeVertical * 50,
+            padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.blockSizeVertical * 2,
+                    horizontal: SizeConfig.safeBlockHorizontal * 7,
+                  ),
+                  child: Text(
+                    "Please enter Scene Name e.g. 'Im Home' and attach your favourite scene image.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[900]),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.safeBlockHorizontal * 7),
+                  child: Form(
+                    key: sceneDetailsFormKey,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 5.0),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)),
+                            image: DecorationImage(
+                              fit: BoxFit.fill,
+                              image: AssetImage(
+                                "assets/text_background.png",
+                              ),
+                            ),
+                          ),
+                          child: TextFormField(
+                            controller: sceneNameController,
+                            validator: (val) => val.length == 0 || val == ""
+                                ? "Enter your Scene Name e.g, 'Im Home'"
+                                : null,
+                            keyboardType: TextInputType.emailAddress,
+                            style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.0),
+                            decoration: InputDecoration(
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Colors.transparent, width: 1.0),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.transparent),
+                                ),
+                                contentPadding: EdgeInsets.all(15.0),
+                                hintText: "Enter Scene Name",
+                                hintStyle: TextStyle(
+                                    letterSpacing: 0,
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w600),
+                                prefixIcon: const Icon(
+                                  Icons.important_devices,
+                                  color: Color(0xFF222222),
+                                  size: 15.0,
+                                ),
+                                prefixIconConstraints: BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 25,
+                                ),
+                                fillColor: Colors.transparent,
+                                filled: true),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 5.0),
+                              child: InkWell(
+                                onTap: () {
+                                  pickScenePhoto(ImageSource.camera);
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        width:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0)),
+                                            border: Border.all(
+                                                width: 2.0,
+                                                color: Color(0xFF222222))),
+                                        child: Icon(Icons.camera_alt,
+                                            size: 20, color: Color(0xFF222222)),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 5,
+                                      ),
+                                      Text(
+                                        'Take Photo',
+                                        style: TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 13.0,
+                                            color: Color(0xff222222)
+                                                .withOpacity(0.9),
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 5.0),
+                              child: InkWell(
+                                onTap: () {
+                                  var test =
+                                      pickScenePhoto(ImageSource.gallery);
+                                  print(test.toString());
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        width:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0)),
+                                            border: Border.all(
+                                                width: 2.0,
+                                                color: Color(0xFF222222))),
+                                        child: Icon(Icons.image,
+                                            size: 20, color: Color(0xFF222222)),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 5,
+                                      ),
+                                      Text(
+                                        'Attach Photo',
+                                        style: TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 13.0,
+                                            color: Color(0xff222222)
+                                                .withOpacity(0.9),
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        checkImage
+                            ? Container(
+                                height: SizeConfig.blockSizeVertical * 30,
+                                width: SizeConfig.blockSizeHorizontal * 40,
+                                child: checkImage
+                                    ? Image.file(
+                                        _sceneImage,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset('assets/im_home.png'),
+                              )
+                            : SizedBox(height: 0)
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                Container(
+                  width: double.maxFinite,
+                  alignment: Alignment.bottomRight,
+                  child: InkWell(
+                    onTap: () {
+                      validateSceneRegistration(context);
+                      // validateHubRegistration(context);
                       // Navigator.pop(context);
                     },
                     child: FractionallySizedBox(
@@ -910,130 +1407,132 @@ class _ControlPanelState extends State<ControlPanel> {
     );
   }
 
-  _addSceneDialog() async {
-    await showDialog<String>(
-      barrierDismissible: false,
+  //Clear sceneImage
+  void _clearSceneImage() {
+    setState(() {
+      this._sceneImage = null;
+    });
+  }
+
+  //Select photo
+  Future<bool> pickScenePhoto(ImageSource source) async {
+    _clearSceneImage();
+
+    final _picker = ImagePicker();
+    PickedFile selectedPhoto = await _picker.getImage(source: source);
+
+    setState(() {
+      this.checkImage = true;
+      this._sceneImage = File(selectedPhoto.path);
+    });
+
+    return this.checkImage;
+  }
+
+  ShowLoadingDialog(BuildContext context) {
+    return showDialog(
       context: context,
-      child: new Container(
-        padding: EdgeInsets.all(0.0),
-        child: new AlertDialog(
-          contentPadding: EdgeInsets.all(0.0),
-          backgroundColor: Colors.grey[200],
-          content: new Container(
-            height: SizeConfig.blockSizeVertical * 30,
-            padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: SizeConfig.blockSizeVertical * 2,
-                    horizontal: SizeConfig.safeBlockHorizontal * 7,
-                  ),
-                  child: Text(
-                    'Please input the Hub Code to link you app and the hub',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey[900]),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.safeBlockHorizontal * 7),
-                  child: Form(
-                    key: linkHubFormKey,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 5.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        image: DecorationImage(
-                          fit: BoxFit.fill,
-                          image: AssetImage(
-                            "assets/text_background.png",
-                          ),
-                        ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              content: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Center(
+                  child: Column(children: [
+                    Opacity(
+                      child: Image.asset(
+                        'assets/loader.gif',
+                        colorBlendMode: BlendMode.multiply,
                       ),
-                      child: TextFormField(
-                        controller: hubIdController,
-                        validator: (val) => val.length == 0 || val == ""
-                            ? "Enter your Hub ID"
-                            : null,
-                        keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15.0),
-                        decoration: InputDecoration(
-                            enabledBorder: const UnderlineInputBorder(
-                              borderSide: const BorderSide(
-                                  color: Colors.transparent, width: 1.0),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.transparent),
-                            ),
-                            contentPadding: EdgeInsets.all(15.0),
-                            hintText: 'Hub ID',
-                            hintStyle: TextStyle(
-                                letterSpacing: 0,
-                                fontFamily: 'Montserrat',
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w600),
-                            prefixIcon: const Icon(
-                              Icons.important_devices,
-                              color: Color(0xFF222222),
-                              size: 15.0,
-                            ),
-                            prefixIconConstraints: BoxConstraints(
-                              minWidth: 30,
-                              minHeight: 25,
-                            ),
-                            fillColor: Colors.transparent,
-                            filled: true),
-                      ),
+                      opacity: 1,
                     ),
-                  ),
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Container(
-                  width: double.maxFinite,
-                  alignment: Alignment.bottomRight,
-                  child: InkWell(
-                    onTap: () {
-                      validateHubRegistration(context);
-                      // Navigator.pop(context);
-                    },
-                    child: FractionallySizedBox(
-                      widthFactor: 0.5,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.0),
-                            bottomRight: Radius.circular(4.0)),
-                        child: Container(
-                          padding: EdgeInsets.all(20.0),
-                          color: Color(0xFF222222),
-                          alignment: Alignment.center,
-                          child: Text('Submit'.toUpperCase(),
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontFamily: 'Montserrat',
-                                  letterSpacing: 1.0,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500)),
-                        ),
-                      ),
+                    SizedBox(
+                      height: 10,
                     ),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
+                    Text(
+                      "Please Wait...",
+                      style: TextStyle(
+                          color: Colors.black.withOpacity(0.7),
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18.0),
+                    )
+                  ]),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  // Validate and register new scene
+  validateSceneRegistration(BuildContext context) async {
+    final SharedPreferences prefs = await _prefs;
+    ShowLoadingDialog(context);
+    if (sceneNameController.text.isEmpty) {
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+      SweetAlert.show(context,
+          subtitle: "Please enter the room name e.g. 'Living Room'",
+          style: SweetAlertStyle.error);
+    } else {
+      if (sceneDetailsFormKey.currentState.validate()) {
+        sceneDetailsFormKey.currentState.save();
+        this.sceneName = sceneNameController.text;
+        String userId = prefs.getString("user_id");
+
+        if (_sceneImage != null) {
+          String sceneUrl = await scenesClass.uploadImage(_sceneImage);
+          print(sceneUrl);
+          if (sceneUrl != null) {
+            CommonData sceneData = await registerUserScene(
+                context, userId, this.sceneName, sceneUrl);
+            if (sceneData.success == 1) {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              SweetAlert.show(context,
+                  subtitle:
+                      "Scene created successfully, please click the scene to configure.",
+                  style: SweetAlertStyle.success);
+            } else {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              SweetAlert.show(context,
+                  subtitle: "Sorry, scene could not be created.",
+                  style: SweetAlertStyle.error);
+            }
+          } else {
+            Navigator.of(context).pop();
+            SweetAlert.show(context,
+                subtitle:
+                    "Sorry an error occured while uploading image, please try again.",
+                style: SweetAlertStyle.error);
+          }
+        } else {
+          Navigator.of(context).pop();
+          SweetAlert.show(context,
+              subtitle: "Please select an Photo to upload",
+              style: SweetAlertStyle.error);
+        }
+      }
+    }
+  }
+
+  Future<CommonData> registerUserScene(BuildContext context, String userId,
+      String sceneName, String sceneImage) async {
+    try {
+      CommonData sceneData =
+          await scenesClass.registerUserScene(userId, sceneName, sceneImage);
+      if (sceneData.success == 1) {
+        return sceneData;
+      } else {
+        return sceneData;
+      }
+    } catch (error) {
+      print(error);
+    }
   }
 }
