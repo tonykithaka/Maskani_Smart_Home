@@ -157,7 +157,7 @@ class _ControlPanelState extends State<ControlPanel> {
 
   ViewScene(Scene sceneData) async {
     if (sceneData.status == 'No state') {
-      _dialogCall(context);
+      _dialogSceneCall(context);
     } else {
       Navigator.of(context).push(PageRouteBuilder(
         fullscreenDialog: true,
@@ -189,7 +189,7 @@ class _ControlPanelState extends State<ControlPanel> {
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             final ScenesData scenesData = snapshot.data;
-            final List<Scene> sceneList = scenesData.scenes;
+            final List<Scene> sceneList = scenesData.scenes.reversed.toList();
 
             return new Swiper(
               itemBuilder: (BuildContext context, int index) {
@@ -564,7 +564,7 @@ class _ControlPanelState extends State<ControlPanel> {
                               ),
                               Container(
                                 child: Text(
-                                  'Tap card to configure room devices',
+                                  'Tap card to configure room',
                                   style: TextStyle(
                                       color: Color(0xFFF8F7F8),
                                       fontFamily: 'Montserrat',
@@ -581,7 +581,8 @@ class _ControlPanelState extends State<ControlPanel> {
                                   if (snapshot.connectionState ==
                                       ConnectionState.done) {
                                     final RoomData roomsData = snapshot.data;
-                                    final List<Room> roomList = roomsData.rooms;
+                                    final List<Room> roomList =
+                                        roomsData.rooms.reversed.toList();
                                     return Container(
                                       height: SizeConfig.blockSizeVertical * 40,
                                       child: CarouselSlider(
@@ -606,7 +607,7 @@ class _ControlPanelState extends State<ControlPanel> {
                                                   if (i.roomName ==
                                                       'ADD ROOM') {
                                                     print('Viewing room now');
-                                                    _addRoomDialog();
+                                                    _dialogRoomCall(context);
                                                   } else {
                                                     ViewRoom(i);
                                                   }
@@ -761,243 +762,6 @@ class _ControlPanelState extends State<ControlPanel> {
     );
   }
 
-  _addRoomDialog() async {
-    await showDialog<String>(
-      barrierDismissible: false,
-      context: context,
-      child: new Container(
-        padding: EdgeInsets.all(0.0),
-        child: new AlertDialog(
-          contentPadding: EdgeInsets.all(0.0),
-          backgroundColor: Colors.grey[200],
-          content: SingleChildScrollView(
-            child: new Container(
-              height: SizeConfig.blockSizeVertical * 50,
-              padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: SizeConfig.blockSizeVertical * 2,
-                      horizontal: SizeConfig.safeBlockHorizontal * 7,
-                    ),
-                    child: Text(
-                      "Please enter Room Name e.g. 'Living Room' and attach your favourite room image.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey[900]),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.safeBlockHorizontal * 7),
-                    child: Form(
-                      key: roomDetailsFormKey,
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)),
-                              image: DecorationImage(
-                                fit: BoxFit.fill,
-                                image: AssetImage(
-                                  "assets/text_background.png",
-                                ),
-                              ),
-                            ),
-                            child: TextFormField(
-                              controller: roomNameController,
-                              validator: (val) => val.length == 0 || val == ""
-                                  ? "Enter your Room Name e.g, 'Living Room'"
-                                  : null,
-                              keyboardType: TextInputType.emailAddress,
-                              style: TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15.0),
-                              decoration: InputDecoration(
-                                  enabledBorder: const UnderlineInputBorder(
-                                    borderSide: const BorderSide(
-                                        color: Colors.transparent, width: 1.0),
-                                  ),
-                                  focusedBorder: UnderlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.transparent),
-                                  ),
-                                  contentPadding: EdgeInsets.all(15.0),
-                                  hintText: "Enter Room Name",
-                                  hintStyle: TextStyle(
-                                      letterSpacing: 0,
-                                      fontFamily: 'Montserrat',
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w600),
-                                  prefixIcon: const Icon(
-                                    Icons.important_devices,
-                                    color: Color(0xFF222222),
-                                    size: 15.0,
-                                  ),
-                                  prefixIconConstraints: BoxConstraints(
-                                    minWidth: 30,
-                                    minHeight: 25,
-                                  ),
-                                  fillColor: Colors.transparent,
-                                  filled: true),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 20.0,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(vertical: 5.0),
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 5.0),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Container(
-                                          alignment: Alignment.center,
-                                          width:
-                                              SizeConfig.blockSizeHorizontal *
-                                                  12,
-                                          height:
-                                              SizeConfig.blockSizeHorizontal *
-                                                  12,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(8.0)),
-                                              border: Border.all(
-                                                  width: 2.0,
-                                                  color: Color(0xFF222222))),
-                                          child: Icon(Icons.camera_alt,
-                                              size: 20,
-                                              color: Color(0xFF222222)),
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              SizeConfig.blockSizeHorizontal *
-                                                  5,
-                                        ),
-                                        Text(
-                                          'Take Photo',
-                                          style: TextStyle(
-                                              fontFamily: 'Montserrat',
-                                              fontSize: 13.0,
-                                              color: Color(0xff222222)
-                                                  .withOpacity(0.9),
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(vertical: 5.0),
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 5.0),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Container(
-                                          alignment: Alignment.center,
-                                          width:
-                                              SizeConfig.blockSizeHorizontal *
-                                                  12,
-                                          height:
-                                              SizeConfig.blockSizeHorizontal *
-                                                  12,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(8.0)),
-                                              border: Border.all(
-                                                  width: 2.0,
-                                                  color: Color(0xFF222222))),
-                                          child: Icon(Icons.image,
-                                              size: 20,
-                                              color: Color(0xFF222222)),
-                                        ),
-                                        SizedBox(
-                                          height:
-                                              SizeConfig.blockSizeHorizontal *
-                                                  5,
-                                        ),
-                                        Text(
-                                          'Attach Photo',
-                                          style: TextStyle(
-                                              fontFamily: 'Montserrat',
-                                              fontSize: 13.0,
-                                              color: Color(0xff222222)
-                                                  .withOpacity(0.9),
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  Container(
-                    width: double.maxFinite,
-                    alignment: Alignment.bottomRight,
-                    child: InkWell(
-                      onTap: () {
-                        validateHubRegistration(context);
-                        // Navigator.pop(context);
-                      },
-                      child: FractionallySizedBox(
-                        widthFactor: 0.5,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10.0),
-                              bottomRight: Radius.circular(4.0)),
-                          child: Container(
-                            padding: EdgeInsets.all(20.0),
-                            color: Color(0xFF222222),
-                            alignment: Alignment.center,
-                            child: Text('Submit'.toUpperCase(),
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontFamily: 'Montserrat',
-                                    letterSpacing: 1.0,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   _addHubDialog() async {
     await showDialog<String>(
       barrierDismissible: false,
@@ -1019,7 +783,7 @@ class _ControlPanelState extends State<ControlPanel> {
                     horizontal: SizeConfig.safeBlockHorizontal * 7,
                   ),
                   child: Text(
-                    'Please input the Hub Code to link you app and the hub',
+                    'Please input the Hub Code to link your app and the hub',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontFamily: 'Montserrat',
@@ -1124,12 +888,21 @@ class _ControlPanelState extends State<ControlPanel> {
     );
   }
 
-  Future<void> _dialogCall(BuildContext context) {
+  Future<void> _dialogSceneCall(BuildContext context) {
     return showDialog(
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
           return _addSceneDialog();
+        });
+  }
+
+  Future<void> _dialogRoomCall(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return _addRoomDialog();
         });
   }
 }
@@ -1158,6 +931,7 @@ class __addSceneDialogState extends State<_addSceneDialog> {
 
   var scenesClass = new Scenes();
   var roomsClass = new Rooms();
+  var controlPanel = new _ControlPanelState();
 
   @override
   Widget build(BuildContext context) {
@@ -1236,7 +1010,7 @@ class __addSceneDialogState extends State<_addSceneDialog> {
                                     fontSize: 14.0,
                                     fontWeight: FontWeight.w600),
                                 prefixIcon: const Icon(
-                                  Icons.important_devices,
+                                  Icons.scanner,
                                   color: Color(0xFF222222),
                                   size: 15.0,
                                 ),
@@ -1491,6 +1265,7 @@ class __addSceneDialogState extends State<_addSceneDialog> {
             CommonData sceneData = await registerUserScene(
                 context, userId, this.sceneName, sceneUrl);
             if (sceneData.success == 1) {
+              controlPanel.FetchScenes();
               Navigator.of(context).pop();
               Navigator.of(context).pop();
               SweetAlert.show(context,
@@ -1530,6 +1305,410 @@ class __addSceneDialogState extends State<_addSceneDialog> {
         return sceneData;
       } else {
         return sceneData;
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+}
+
+class _addRoomDialog extends StatefulWidget {
+  @override
+  __addRoomDialogState createState() => __addRoomDialogState();
+}
+
+class __addRoomDialogState extends State<_addRoomDialog> {
+  File _roomImage;
+  bool checkImage = false;
+
+  String roomName;
+  String sceneName;
+
+  final linkHubFormKey = new GlobalKey<FormState>();
+  final sceneDetailsFormKey = new GlobalKey<FormState>();
+  final roomDetailsFormKey = new GlobalKey<FormState>();
+
+  var hubIdController = TextEditingController();
+  var sceneNameController = TextEditingController();
+  var roomNameController = TextEditingController();
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  var scenesClass = new Scenes();
+  var roomsClass = new Rooms();
+  var controlPanel = new _ControlPanelState();
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      padding: EdgeInsets.all(0.0),
+      child: new AlertDialog(
+        contentPadding: EdgeInsets.all(0.0),
+        backgroundColor: Colors.grey[200],
+        content: SingleChildScrollView(
+          child: new Container(
+            height: this.checkImage
+                ? SizeConfig.blockSizeVertical * 78
+                : SizeConfig.blockSizeVertical * 50,
+            padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: SizeConfig.blockSizeVertical * 2,
+                    horizontal: SizeConfig.safeBlockHorizontal * 7,
+                  ),
+                  child: Text(
+                    "Please enter Room Name e.g. 'Living Room' and attach your favourite room image.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[900]),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.safeBlockHorizontal * 7),
+                  child: Form(
+                    key: roomDetailsFormKey,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 5.0),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0)),
+                            image: DecorationImage(
+                              fit: BoxFit.fill,
+                              image: AssetImage(
+                                "assets/text_background.png",
+                              ),
+                            ),
+                          ),
+                          child: TextFormField(
+                            controller: roomNameController,
+                            validator: (val) => val.length == 0 || val == ""
+                                ? "Enter your Room Name e.g, 'Living Room'"
+                                : null,
+                            keyboardType: TextInputType.emailAddress,
+                            style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.0),
+                            decoration: InputDecoration(
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Colors.transparent, width: 1.0),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.transparent),
+                                ),
+                                contentPadding: EdgeInsets.all(15.0),
+                                hintText: "Enter Room Name",
+                                hintStyle: TextStyle(
+                                    letterSpacing: 0,
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w600),
+                                prefixIcon: const Icon(
+                                  Icons.house,
+                                  color: Color(0xFF222222),
+                                  size: 15.0,
+                                ),
+                                prefixIconConstraints: BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 25,
+                                ),
+                                fillColor: Colors.transparent,
+                                filled: true),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 5.0),
+                              child: InkWell(
+                                onTap: () {
+                                  pickRoomPhoto(ImageSource.camera);
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        width:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0)),
+                                            border: Border.all(
+                                                width: 2.0,
+                                                color: Color(0xFF222222))),
+                                        child: Icon(Icons.camera_alt,
+                                            size: 20, color: Color(0xFF222222)),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 5,
+                                      ),
+                                      Text(
+                                        'Take Photo',
+                                        style: TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 13.0,
+                                            color: Color(0xff222222)
+                                                .withOpacity(0.9),
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 5.0),
+                              child: InkWell(
+                                onTap: () {
+                                  var test = pickRoomPhoto(ImageSource.gallery);
+                                  print(test.toString());
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        width:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 12,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8.0)),
+                                            border: Border.all(
+                                                width: 2.0,
+                                                color: Color(0xFF222222))),
+                                        child: Icon(Icons.image,
+                                            size: 20, color: Color(0xFF222222)),
+                                      ),
+                                      SizedBox(
+                                        height:
+                                            SizeConfig.blockSizeHorizontal * 5,
+                                      ),
+                                      Text(
+                                        'Attach Photo',
+                                        style: TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 13.0,
+                                            color: Color(0xff222222)
+                                                .withOpacity(0.9),
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        checkImage
+                            ? Container(
+                                height: SizeConfig.blockSizeVertical * 30,
+                                width: SizeConfig.blockSizeHorizontal * 40,
+                                child: checkImage
+                                    ? Image.file(
+                                        _roomImage,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset('assets/im_home.png'),
+                              )
+                            : SizedBox(height: 0)
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                Container(
+                  width: double.maxFinite,
+                  alignment: Alignment.bottomRight,
+                  child: InkWell(
+                    onTap: () {
+                      validateRoomRegistration(context);
+                      // validateHubRegistration(context);
+                      // Navigator.pop(context);
+                    },
+                    child: FractionallySizedBox(
+                      widthFactor: 0.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10.0),
+                            bottomRight: Radius.circular(4.0)),
+                        child: Container(
+                          padding: EdgeInsets.all(20.0),
+                          color: Color(0xFF222222),
+                          alignment: Alignment.center,
+                          child: Text('Submit'.toUpperCase(),
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'Montserrat',
+                                  letterSpacing: 1.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500)),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //Clear sceneImage
+  void _clearSceneImage() {
+    setState(() {
+      this._roomImage = null;
+    });
+  }
+
+  //Select photo
+  Future<bool> pickRoomPhoto(ImageSource source) async {
+    _clearSceneImage();
+
+    final _picker = ImagePicker();
+    PickedFile selectedPhoto = await _picker.getImage(source: source);
+
+    setState(() {
+      this.checkImage = true;
+      this._roomImage = File(selectedPhoto.path);
+    });
+
+    return this.checkImage;
+  }
+
+  ShowLoadingDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              content: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Center(
+                  child: Column(children: [
+                    Opacity(
+                      child: Image.asset(
+                        'assets/loader.gif',
+                        colorBlendMode: BlendMode.multiply,
+                      ),
+                      opacity: 1,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Please Wait...",
+                      style: TextStyle(
+                          color: Colors.black.withOpacity(0.7),
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18.0),
+                    )
+                  ]),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Validate and register new scene
+  validateRoomRegistration(BuildContext context) async {
+    final SharedPreferences prefs = await _prefs;
+    ShowLoadingDialog(context);
+    if (roomNameController.text.isEmpty) {
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+      SweetAlert.show(context,
+          subtitle: "Please enter the room name e.g. 'Living Room'",
+          style: SweetAlertStyle.error);
+    } else {
+      if (roomDetailsFormKey.currentState.validate()) {
+        roomDetailsFormKey.currentState.save();
+        this.roomName = roomNameController.text;
+        String userId = prefs.getString("user_id");
+
+        if (_roomImage != null) {
+          String roomUrl = await roomsClass.uploadImage(_roomImage);
+          print(roomUrl);
+          if (roomUrl != null) {
+            CommonData roomData =
+                await registerUserRoom(context, userId, this.roomName, roomUrl);
+            if (roomData.success == 1) {
+              // controlPanel.FetchScenes();
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              SweetAlert.show(context,
+                  subtitle:
+                      "Room created successfully, please click the room card to configure.",
+                  style: SweetAlertStyle.success);
+            } else {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              SweetAlert.show(context,
+                  subtitle: "Sorry, room could not be created.",
+                  style: SweetAlertStyle.error);
+            }
+          } else {
+            Navigator.of(context).pop();
+            SweetAlert.show(context,
+                subtitle:
+                    "Sorry an error occurred while uploading image, please try again.",
+                style: SweetAlertStyle.error);
+          }
+        } else {
+          Navigator.of(context).pop();
+          SweetAlert.show(context,
+              subtitle: "Please select an Photo to upload",
+              style: SweetAlertStyle.error);
+        }
+      }
+    }
+  }
+
+  Future<CommonData> registerUserRoom(BuildContext context, String userId,
+      String roomName, String roomImage) async {
+    try {
+      CommonData roomData =
+          await roomsClass.registerUserRoom(userId, roomName, roomImage);
+      if (roomData.success == 1) {
+        return roomData;
+      } else {
+        return roomData;
       }
     } catch (error) {
       print(error);

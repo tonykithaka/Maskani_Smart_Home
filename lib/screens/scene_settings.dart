@@ -504,7 +504,7 @@ class _SceneSettingsState extends State<SceneSettings> {
                             ),
                           ),
                           AnimatedOpacity(
-                            duration: Duration(milliseconds: 300),
+                            duration: Duration(milliseconds: 500),
                             opacity: (showWindow) ? 1.0 : 0.0,
                             child: BackdropFilter(
                               filter:
@@ -514,7 +514,7 @@ class _SceneSettingsState extends State<SceneSettings> {
                             ),
                           ),
                           AnimatedPositioned(
-                            duration: Duration(milliseconds: 500),
+                            duration: Duration(milliseconds: 1000),
                             curve: Curves.fastOutSlowIn,
                             bottom: 0,
                             right: showWindow
@@ -641,6 +641,8 @@ class _SceneSettingsState extends State<SceneSettings> {
                                                                             value.toString());
                                                                         arguments.status =
                                                                             'Active';
+                                                                        isSwitched =
+                                                                            !isSwitched;
                                                                       });
                                                                     } else if (value =
                                                                         false) {
