@@ -3,7 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:maskanismarthome/models/rooms.dart';
+import 'package:maskanismarthome/repository/RoomsRepo.dart';
 import 'package:maskanismarthome/style/size_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DeviceSettings extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class DeviceSettings extends StatefulWidget {
 
 class _DeviceSettingsState extends State<DeviceSettings> {
   List<Color> _colors = [Color(0xffFFFFFF), Color(0xFFC1C1C1)];
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Color textColor = Color(0xFF333333);
 
   bool showWindow = false;
@@ -22,6 +25,8 @@ class _DeviceSettingsState extends State<DeviceSettings> {
   String switchOne;
   String switchTwo;
   String switchThree;
+
+  var roomClass = Rooms();
 
   ShowContentContainer() {
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -68,6 +73,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
   @override
   void initState() {
     super.initState();
+    FetchRooms();
     ShowContentContainer();
     setInitTemperature();
   }
@@ -847,18 +853,69 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     });
   }
 
+  List<Room> _roomItems;
+
+  Future<List<Room>> FetchRooms() async {
+    final SharedPreferences prefs = await _prefs;
+    String user_id = prefs.getString("user_id");
+    try {
+      RoomData roomsData = await roomClass.FetchUserRooms(user_id);
+      setState(() {
+        _roomItems = roomsData.rooms;
+      });
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  String selectedRoom;
+
   Widget RoomSelector() {
     return Container(
       height: SizeConfig.blockSizeVertical * 7,
       width: double.maxFinite,
       alignment: Alignment.center,
-      child: Text(
-        'LIVING ROOM',
-        style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.w700,
-            fontSize: 18.0,
-            letterSpacing: 1.0),
+      child: DropdownButtonHideUnderline(
+        child: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButton(
+            value: selectedRoom,
+            iconSize: 30.0,
+            icon: null,
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[900],
+            ),
+            hint: Text('Select Room',
+                style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green[700],
+                )),
+            onChanged: (String newValue) {
+              setState(() {
+                selectedRoom = newValue;
+              });
+            },
+            items: _roomItems?.map((item) {
+              return DropdownMenuItem(
+                child: Text(
+                  item.roomName,
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[900],
+                  ),
+                ),
+                value: item.roomId,
+              );
+            })?.toList(),
+          ),
+        ),
       ),
     );
   }

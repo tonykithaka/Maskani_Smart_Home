@@ -606,7 +606,6 @@ class _ControlPanelState extends State<ControlPanel> {
                                                   //check room data
                                                   if (i.roomName ==
                                                       'ADD ROOM') {
-                                                    print('Viewing room now');
                                                     _dialogRoomCall(context);
                                                   } else {
                                                     ViewRoom(i);
@@ -740,7 +739,7 @@ class _ControlPanelState extends State<ControlPanel> {
                                   ),
                                   color: Color(0xFF191919),
                                   onPressed: () {
-                                    _addSceneDialog();
+                                    _dialogRoomCall(context);
                                   },
                                   child: Text('ADD ROOM',
                                       style: TextStyle(
