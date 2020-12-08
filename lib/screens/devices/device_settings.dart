@@ -867,8 +867,10 @@ class _DeviceSettingsState extends State<DeviceSettings> {
       RoomData roomsData = await roomClass.FetchUserRooms(user_id);
       setState(() {
         _roomItems = roomsData.rooms;
-        print(_roomItems.length);
       });
+      if (_roomItems.length == 1) {
+        _dialogRoomCall(context);
+      }
     } catch (error) {
       print(error);
     }

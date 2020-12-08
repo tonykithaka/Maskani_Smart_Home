@@ -87,6 +87,14 @@ flutter:
     - assets/window_bg.png
     - assets/Power_Outlets_bg.png
     - assets/text_background.png
+    - assets/hubRegiestration.png
+    - assets/add_scene_screenshot.png
+    - assets/roomsWidget.png
+    - assets/sceneSwitch.png
+    - assets/timeWidget.png
+    - assets/saveSettingsWidget.png
+    - assets/configureDeviceWidgets.png
+    - assets/deviceListWidget.png
     - .env
 #     - images/a_dot_ham.jpeg
 

@@ -60,6 +60,9 @@ class _ControlPanelState extends State<ControlPanel> {
   var roomsClass = new Rooms();
   var hubsClass = new Hubs();
 
+  bool checkEditDelete;
+  String sceneAction;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -86,8 +89,6 @@ class _ControlPanelState extends State<ControlPanel> {
     try {
       HubData hubData = await hubsClass.FetchHubDetails(user_id);
       if (hubData.success == 0) {
-        var test = hubData.success;
-        print('this message is $test');
         _addHubDialog();
       } else {}
     } catch (error) {
@@ -155,9 +156,9 @@ class _ControlPanelState extends State<ControlPanel> {
     }
   }
 
-  ViewScene(Scene sceneData) async {
+  ViewScene(Scene sceneData, bool checkEditDelete, String sceneAction) async {
     if (sceneData.status == 'No state') {
-      _dialogSceneCall(context);
+      _dialogSceneCall(context, sceneData, checkEditDelete, sceneAction);
     } else {
       Navigator.of(context).push(PageRouteBuilder(
         fullscreenDialog: true,
@@ -178,6 +179,16 @@ class _ControlPanelState extends State<ControlPanel> {
     }
   }
 
+  EditScene(Scene sceneData, bool checkEditDelete, String sceneAction) async {
+    if (sceneData.status == 'No state') {
+      SweetAlert.show(context,
+          subtitle: 'Sorry, this card cannot be edited or removed.',
+          style: SweetAlertStyle.error);
+    } else {
+      _dialogSceneCall(context, sceneData, checkEditDelete, sceneAction);
+    }
+  }
+
   ViewRoom(Room roomData) async {
     print(roomData.roomId);
     Navigator.pushNamed(context, "/room_setting", arguments: roomData);
@@ -187,105 +198,203 @@ class _ControlPanelState extends State<ControlPanel> {
     return FutureBuilder(
         future: FetchScenes(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return CircularProgressIndicator();
+          } else if (snapshot.connectionState == ConnectionState.done) {
             final ScenesData scenesData = snapshot.data;
             final List<Scene> sceneList = scenesData.scenes.reversed.toList();
 
-            return new Swiper(
-              itemBuilder: (BuildContext context, int index) {
-                Scene item = sceneList[index];
-                return GestureDetector(
-                  onTap: () {
-                    this.ViewScene(item);
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 20.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 10), // changes position of shadow
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10.0),
-                        child: Stack(
-                          children: [
-                            Container(
-                              height: double.maxFinite,
-                              child: Hero(
-                                tag: Text('hello' + item.sceneId),
-                                child: Image.network(
-                                  item.imageUrl,
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
+            return Column(
+              children: [
+                new Swiper(
+                  itemBuilder: (BuildContext context, int index) {
+                    Scene item = sceneList[index];
+                    return GestureDetector(
+                      onTap: () {
+                        this.ViewScene(item, false, 'View');
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset:
+                                  Offset(0, 10), // changes position of shadow
                             ),
-                            Container(
-                              width: double.maxFinite,
-                              decoration: new BoxDecoration(
-                                gradient: new LinearGradient(
-                                    colors: [
-                                      Colors.grey.withOpacity(0.0),
-                                      Colors.black.withOpacity(0.8),
-                                    ],
-                                    begin: const FractionalOffset(0.0, 0.0),
-                                    end: const FractionalOffset(0.0, 1.0),
-                                    stops: [0.0, 1.0],
-                                    tileMode: TileMode.clamp),
-                              ),
-                              padding: EdgeInsets.only(
-                                  bottom: SizeConfig.blockSizeVertical * 3),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  Text(
-                                    item.sceneName,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.w400,
-                                        letterSpacing: 2),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.symmetric(
-                                        vertical:
-                                            SizeConfig.blockSizeVertical * 2),
-                                    height: 0.5,
-                                    width: 20.0,
-                                    color: Colors.white,
-                                  ),
-                                  Text(
-                                    item.status,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 1),
-                                  ),
-                                ],
-                              ),
-                            )
                           ],
-                        )),
-                  ),
-                );
-              },
-              itemCount: sceneList.length,
-              itemWidth: 250.0,
-              itemHeight: 400.0,
-              layout: SwiperLayout.TINDER,
+                        ),
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Stack(
+                              children: [
+                                Container(
+                                  height: double.maxFinite,
+                                  child: Hero(
+                                    tag: Text('hello' + item.sceneId),
+                                    child: Image.network(
+                                      item.imageUrl,
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: double.maxFinite,
+                                  decoration: new BoxDecoration(
+                                    gradient: new LinearGradient(
+                                        colors: [
+                                          Colors.grey.withOpacity(0.0),
+                                          Colors.black.withOpacity(0.8),
+                                        ],
+                                        begin: const FractionalOffset(0.0, 0.0),
+                                        end: const FractionalOffset(0.0, 1.0),
+                                        stops: [0.0, 1.0],
+                                        tileMode: TileMode.clamp),
+                                  ),
+                                  padding: EdgeInsets.only(
+                                      bottom: SizeConfig.blockSizeVertical * 3),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                EditScene(item, true, 'Edit');
+                                              },
+                                              child: Container(
+                                                height: SizeConfig
+                                                        .blockSizeHorizontal *
+                                                    20,
+                                                width: double.maxFinite,
+                                                child: Container(
+                                                  padding: EdgeInsets.only(
+                                                      left: SizeConfig
+                                                              .blockSizeHorizontal *
+                                                          5),
+                                                  height: SizeConfig
+                                                          .blockSizeHorizontal *
+                                                      20,
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Icon(
+                                                    Icons.edit_outlined,
+                                                    color: Colors.white,
+                                                    size: 25.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                EditScene(item, true, 'Delete');
+                                              },
+                                              child: Container(
+                                                height: SizeConfig
+                                                        .blockSizeHorizontal *
+                                                    20,
+                                                width: double.maxFinite,
+                                                child: Container(
+                                                  padding: EdgeInsets.only(
+                                                      right: SizeConfig
+                                                              .blockSizeHorizontal *
+                                                          5),
+                                                  height: SizeConfig
+                                                          .blockSizeHorizontal *
+                                                      20,
+                                                  alignment:
+                                                      Alignment.centerRight,
+                                                  child: Icon(
+                                                    Icons.delete_outline,
+                                                    color: Colors.white,
+                                                    size: 30.0,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            item.sceneName.toUpperCase(),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: 'Montserrat',
+                                                fontSize: 18.0,
+                                                fontWeight: FontWeight.w400,
+                                                letterSpacing: 2),
+                                          ),
+                                          Container(
+                                            margin: EdgeInsets.symmetric(
+                                                vertical: SizeConfig
+                                                        .blockSizeVertical *
+                                                    2),
+                                            height: 0.5,
+                                            width: 20.0,
+                                            color: Colors.white,
+                                          ),
+                                          Text(
+                                            item.status,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: 'Montserrat',
+                                                fontSize: 18.0,
+                                                fontWeight: FontWeight.w500,
+                                                letterSpacing: 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            )),
+                      ),
+                    );
+                  },
+                  itemCount: sceneList.length,
+                  itemWidth: 250.0,
+                  itemHeight: 400.0,
+                  layout: SwiperLayout.TINDER,
+                ),
+                InkWell(
+                    onTap: () {
+                      setState(() {});
+                    },
+                    child: Container(
+                        height: SizeConfig.blockSizeHorizontal * 15,
+                        alignment: Alignment.center,
+                        width: double.maxFinite,
+                        child: Text(
+                          'Tap here to Refresh Scenes',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF222222),
+                            fontSize: 15.0,
+                          ),
+                        )))
+              ],
             );
           } else {
-            return CircularProgressIndicator();
+            return Container(
+                height: double.maxFinite,
+                alignment: Alignment.center,
+                child: CircularProgressIndicator());
           }
         });
   }
@@ -434,15 +543,7 @@ class _ControlPanelState extends State<ControlPanel> {
                               size: 20,
                             )),
                         onTap: () {
-                          setState(() {
-                            xOffset = 0.0;
-                            yOffset = 0.0;
-                            scaleFactor = 1.0;
-                            isDrawerOpen = false;
-                            containerRadius = 0.0;
-                            spreadRadius = 0.0;
-                            blurRadius = 0.0;
-                          });
+                          _dialogHelpCall(context);
                         },
                       )
                     ],
@@ -583,142 +684,175 @@ class _ControlPanelState extends State<ControlPanel> {
                                     final RoomData roomsData = snapshot.data;
                                     final List<Room> roomList =
                                         roomsData.rooms.reversed.toList();
-                                    return Container(
-                                      height: SizeConfig.blockSizeVertical * 40,
-                                      child: CarouselSlider(
-                                        options: CarouselOptions(
+                                    return Column(
+                                      children: [
+                                        Container(
                                           height:
-                                              SizeConfig.blockSizeVertical * 35,
-                                          viewportFraction: 0.5,
-                                          initialPage: 0,
-                                          enableInfiniteScroll: false,
-                                          enlargeCenterPage: true,
-                                          aspectRatio: 2.0,
-                                          autoPlayAnimationDuration:
-                                              Duration(milliseconds: 500),
-                                          autoPlayCurve: Curves.fastOutSlowIn,
-                                        ),
-                                        items: roomList.map((i) {
-                                          return Builder(
-                                            builder: (BuildContext context) {
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  //check room data
-                                                  if (i.roomName ==
-                                                      'ADD ROOM') {
-                                                    _dialogRoomCall(context);
-                                                  } else {
-                                                    ViewRoom(i);
-                                                  }
-                                                },
-                                                child: Stack(
-                                                  children: <Widget>[
-                                                    Container(
-                                                      height: SizeConfig
-                                                              .blockSizeVertical *
-                                                          35,
-                                                      width:
-                                                          MediaQuery.of(context)
+                                              SizeConfig.blockSizeVertical * 38,
+                                          child: CarouselSlider(
+                                            options: CarouselOptions(
+                                              height:
+                                                  SizeConfig.blockSizeVertical *
+                                                      35,
+                                              viewportFraction: 0.5,
+                                              initialPage: 0,
+                                              enableInfiniteScroll: false,
+                                              enlargeCenterPage: true,
+                                              aspectRatio: 2.0,
+                                              autoPlayAnimationDuration:
+                                                  Duration(milliseconds: 500),
+                                              autoPlayCurve:
+                                                  Curves.fastOutSlowIn,
+                                            ),
+                                            items: roomList.map((i) {
+                                              return Builder(
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      //check room data
+                                                      if (i.roomName ==
+                                                          'ADD ROOM') {
+                                                        _dialogRoomCall(
+                                                            context);
+                                                      } else {
+                                                        ViewRoom(i);
+                                                      }
+                                                    },
+                                                    child: Stack(
+                                                      children: <Widget>[
+                                                        Container(
+                                                          height: SizeConfig
+                                                                  .blockSizeVertical *
+                                                              35,
+                                                          width: MediaQuery.of(
+                                                                  context)
                                                               .size
                                                               .width,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black
-                                                                .withOpacity(
-                                                                    0.2),
-                                                            spreadRadius: 5,
-                                                            blurRadius: 7,
-                                                            offset: Offset(0,
-                                                                10), // changes position of shadow
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      margin:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 0),
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    10)),
-                                                        child: Image.network(
-                                                          i.imageUrl,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      width: double.maxFinite,
-                                                      decoration:
-                                                          new BoxDecoration(
-                                                              gradient:
-                                                                  new LinearGradient(
-                                                                      colors: [
-                                                                        Colors
-                                                                            .grey
-                                                                            .withOpacity(0.0),
-                                                                        Colors
-                                                                            .black
-                                                                            .withOpacity(0.8),
-                                                                      ],
-                                                                      begin: const FractionalOffset(
-                                                                          0.0, 0.0),
-                                                                      end: const FractionalOffset(
-                                                                          0.0,
-                                                                          1.0),
-                                                                      stops: [
-                                                                        0.0,
-                                                                        1.0
-                                                                      ],
-                                                                      tileMode:
-                                                                          TileMode
-                                                                              .clamp),
-                                                              borderRadius: BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
-                                                                          10))),
-                                                      padding: EdgeInsets.only(
-                                                          bottom: SizeConfig
-                                                                  .blockSizeVertical *
-                                                              3),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .end,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: <Widget>[
-                                                          Text(
-                                                            i.roomName
-                                                                .toUpperCase(),
-                                                            style: TextStyle(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                            boxShadow: [
+                                                              BoxShadow(
                                                                 color: Colors
-                                                                    .white,
-                                                                fontFamily:
-                                                                    'Montserrat',
-                                                                fontSize: 16.0,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                                letterSpacing:
-                                                                    2),
+                                                                    .black
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                spreadRadius: 3,
+                                                                blurRadius: 5,
+                                                                offset: Offset(
+                                                                    0,
+                                                                    5), // changes position of shadow
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      0),
+                                                          child: ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            child:
+                                                                Image.network(
+                                                              i.imageUrl,
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width:
+                                                              double.maxFinite,
+                                                          decoration:
+                                                              new BoxDecoration(
+                                                                  gradient:
+                                                                      new LinearGradient(
+                                                                          colors: [
+                                                                            Colors.grey.withOpacity(0.0),
+                                                                            Colors.black.withOpacity(0.8),
+                                                                          ],
+                                                                          begin: const FractionalOffset(
+                                                                              0.0,
+                                                                              0.0),
+                                                                          end: const FractionalOffset(
+                                                                              0.0,
+                                                                              1.0),
+                                                                          stops: [
+                                                                            0.0,
+                                                                            1.0
+                                                                          ],
+                                                                          tileMode: TileMode
+                                                                              .clamp),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              10))),
+                                                          padding: EdgeInsets.only(
+                                                              bottom: SizeConfig
+                                                                      .blockSizeVertical *
+                                                                  3),
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .end,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: <Widget>[
+                                                              Text(
+                                                                i.roomName
+                                                                    .toUpperCase(),
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontFamily:
+                                                                        'Montserrat',
+                                                                    fontSize:
+                                                                        16.0,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400,
+                                                                    letterSpacing:
+                                                                        2),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
                                               );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                        InkWell(
+                                            onTap: () {
+                                              setState(() {});
                                             },
-                                          );
-                                        }).toList(),
-                                      ),
+                                            child: Container(
+                                                height: SizeConfig
+                                                        .blockSizeHorizontal *
+                                                    15,
+                                                alignment: Alignment.center,
+                                                width: double.maxFinite,
+                                                child: Text(
+                                                  'Tap here to Refresh Rooms',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Montserrat',
+                                                    fontWeight: FontWeight.w300,
+                                                    color: Color(0xFFCCCCCC),
+                                                    fontSize: 15.0,
+                                                  ),
+                                                )))
+                                      ],
                                     );
                                   } else {
                                     return CircularProgressIndicator();
@@ -887,12 +1021,16 @@ class _ControlPanelState extends State<ControlPanel> {
     );
   }
 
-  Future<void> _dialogSceneCall(BuildContext context) {
+  Future<void> _dialogSceneCall(BuildContext context, Scene sceneData,
+      bool checkEditDelete, String sceneAction) {
     return showDialog(
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          return _addSceneDialog();
+          return _addSceneDialog(
+              sceneData: sceneData,
+              checkEditDelete: checkEditDelete,
+              sceneAction: sceneAction);
         });
   }
 
@@ -904,9 +1042,26 @@ class _ControlPanelState extends State<ControlPanel> {
           return _addRoomDialog();
         });
   }
+
+  Future<void> _dialogHelpCall(BuildContext context) {
+    return showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (BuildContext context) {
+          return _helpDialog();
+        });
+  }
 }
 
 class _addSceneDialog extends StatefulWidget {
+  final Scene sceneData;
+  final bool checkEditDelete;
+  final String sceneAction;
+
+  const _addSceneDialog(
+      {Key key, this.sceneData, this.checkEditDelete, this.sceneAction})
+      : super(key: key);
+
   @override
   __addSceneDialogState createState() => __addSceneDialogState();
 }
@@ -914,6 +1069,8 @@ class _addSceneDialog extends StatefulWidget {
 class __addSceneDialogState extends State<_addSceneDialog> {
   File _sceneImage;
   bool checkImage = false;
+  bool checkEditDelete = false;
+  String sceneAction;
 
   String roomName;
   String sceneName;
@@ -931,6 +1088,24 @@ class __addSceneDialogState extends State<_addSceneDialog> {
   var scenesClass = new Scenes();
   var roomsClass = new Rooms();
   var controlPanel = new _ControlPanelState();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    CheckScene(widget.sceneData, widget.checkEditDelete, widget.sceneAction);
+  }
+
+  CheckScene(Scene scene, bool checkEditDelete, String sceneAction) {
+    if (scene.sceneName != 'ADD SCENE') {
+      setState(() {
+        sceneNameController.text = scene.sceneName;
+        this.checkEditDelete = checkEditDelete;
+        this.sceneAction = sceneAction;
+      });
+      print('Scene Action' + this.sceneAction);
+      print('CheckDelete Action' + this.checkEditDelete.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -941,7 +1116,7 @@ class __addSceneDialogState extends State<_addSceneDialog> {
         backgroundColor: Colors.grey[200],
         content: SingleChildScrollView(
           child: new Container(
-            height: this.checkImage
+            height: this.checkImage || checkEditDelete
                 ? SizeConfig.blockSizeVertical * 78
                 : SizeConfig.blockSizeVertical * 50,
             padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
@@ -1133,7 +1308,14 @@ class __addSceneDialogState extends State<_addSceneDialog> {
                                       )
                                     : Image.asset('assets/im_home.png'),
                               )
-                            : SizedBox(height: 0)
+                            : checkEditDelete
+                                ? Image.network(
+                                    widget.sceneData.imageUrl,
+                                    fit: BoxFit.cover,
+                                    height: SizeConfig.blockSizeVertical * 30,
+                                    width: SizeConfig.blockSizeHorizontal * 40,
+                                  )
+                                : SizedBox(height: 0)
                       ],
                     ),
                   ),
@@ -1144,32 +1326,56 @@ class __addSceneDialogState extends State<_addSceneDialog> {
                 Container(
                   width: double.maxFinite,
                   alignment: Alignment.bottomRight,
-                  child: InkWell(
-                    onTap: () {
-                      validateSceneRegistration(context);
-                      // validateHubRegistration(context);
-                      // Navigator.pop(context);
-                    },
-                    child: FractionallySizedBox(
-                      widthFactor: 0.5,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.0),
-                            bottomRight: Radius.circular(4.0)),
-                        child: Container(
-                          padding: EdgeInsets.all(20.0),
-                          color: Color(0xFF222222),
-                          alignment: Alignment.center,
-                          child: Text('Submit'.toUpperCase(),
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontFamily: 'Montserrat',
-                                  letterSpacing: 1.0,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500)),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(20.0),
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Text('Cancel'.toUpperCase(),
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: 'Montserrat',
+                                    letterSpacing: 1.0,
+                                    color: Color(0xFF222222),
+                                    fontWeight: FontWeight.w500)),
+                          ),
                         ),
                       ),
-                    ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            validateSceneRegistration(
+                                context,
+                                widget.sceneData.sceneId,
+                                this.sceneAction,
+                                this.checkEditDelete);
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10.0),
+                                bottomRight: Radius.circular(4.0)),
+                            child: Container(
+                              padding: EdgeInsets.all(20.0),
+                              color: Color(0xFF222222),
+                              alignment: Alignment.center,
+                              child: Text('Submit'.toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontFamily: 'Montserrat',
+                                      letterSpacing: 1.0,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 )
               ],
@@ -1180,17 +1386,8 @@ class __addSceneDialogState extends State<_addSceneDialog> {
     );
   }
 
-  //Clear sceneImage
-  void _clearSceneImage() {
-    setState(() {
-      this._sceneImage = null;
-    });
-  }
-
   //Select photo
   Future<bool> pickScenePhoto(ImageSource source) async {
-    _clearSceneImage();
-
     final _picker = ImagePicker();
     PickedFile selectedPhoto = await _picker.getImage(source: source);
 
@@ -1242,7 +1439,8 @@ class __addSceneDialogState extends State<_addSceneDialog> {
   }
 
   // Validate and register new scene
-  validateSceneRegistration(BuildContext context) async {
+  validateSceneRegistration(BuildContext context, String sceneId,
+      String sceneAction, bool checkEditDelete) async {
     final SharedPreferences prefs = await _prefs;
     ShowLoadingDialog(context);
     if (sceneNameController.text.isEmpty) {
@@ -1257,33 +1455,94 @@ class __addSceneDialogState extends State<_addSceneDialog> {
         this.sceneName = sceneNameController.text;
         String userId = prefs.getString("user_id");
 
-        if (_sceneImage != null) {
-          String sceneUrl = await scenesClass.uploadImage(_sceneImage);
-          print(sceneUrl);
-          if (sceneUrl != null) {
-            CommonData sceneData = await registerUserScene(
-                context, userId, this.sceneName, sceneUrl);
-            if (sceneData.success == 1) {
-              controlPanel.FetchScenes();
-              Navigator.of(context).pop();
+        if ((_sceneImage != null) || (widget.sceneData.imageUrl != null)) {
+          if (checkEditDelete) {
+            if (sceneAction == 'Edit') {
+              try {
+                if (_sceneImage == null) {
+                  setState(() {
+                    _sceneImage = widget.sceneData.imageUrl as File;
+                  });
+                }
+                String sceneUrl = await scenesClass.uploadImage(_sceneImage);
+                CommonData sceneData = await editUserScene(
+                    context, userId, this.sceneName, sceneId, sceneUrl);
+                if (sceneData.success == 1) {
+                  controlPanel.FetchScenes();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  SweetAlert.show(context,
+                      subtitle:
+                          "Scene updated successfully, please click refresh list and tap the scene to configure.",
+                      style: SweetAlertStyle.success);
+                } else {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  SweetAlert.show(context,
+                      subtitle: "Sorry, scene could not be created.",
+                      style: SweetAlertStyle.error);
+                }
+              } catch (e) {
+                Navigator.of(context).pop();
+                SweetAlert.show(context,
+                    subtitle:
+                        "Sorry an error occured while uploading image, please try again.",
+                    style: SweetAlertStyle.error);
+              }
+            } else if (sceneAction == 'Delete') {
+              try {
+                // String sceneUrl = await scenesClass.uploadImage(_sceneImage);
+                CommonData sceneData = await deleteUserScene(
+                    context, userId, this.sceneName, sceneId);
+                if (sceneData.success == 1) {
+                  controlPanel.FetchScenes();
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  SweetAlert.show(context,
+                      subtitle: sceneData.message,
+                      style: SweetAlertStyle.success);
+                } else {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  SweetAlert.show(context,
+                      subtitle: "Sorry, scene could not be created.",
+                      style: SweetAlertStyle.error);
+                }
+              } catch (e) {
+                Navigator.of(context).pop();
+                SweetAlert.show(context,
+                    subtitle:
+                        "Sorry an error occured while uploading image, please try again.",
+                    style: SweetAlertStyle.error);
+              }
+            }
+          } else {
+            try {
+              String sceneUrl = await scenesClass.uploadImage(_sceneImage);
+              CommonData sceneData = await registerUserScene(
+                  context, userId, this.sceneName, sceneUrl);
+              if (sceneData.success == 1) {
+                controlPanel.FetchScenes();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                SweetAlert.show(context,
+                    subtitle:
+                        "Scene created successfully, please click refresh list and tap the scene to configure.",
+                    style: SweetAlertStyle.success);
+              } else {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                SweetAlert.show(context,
+                    subtitle: "Sorry, scene could not be created.",
+                    style: SweetAlertStyle.error);
+              }
+            } catch (e) {
               Navigator.of(context).pop();
               SweetAlert.show(context,
                   subtitle:
-                      "Scene created successfully, please click the scene to configure.",
-                  style: SweetAlertStyle.success);
-            } else {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-              SweetAlert.show(context,
-                  subtitle: "Sorry, scene could not be created.",
+                      "Sorry an error occured while uploading image, please try again.",
                   style: SweetAlertStyle.error);
             }
-          } else {
-            Navigator.of(context).pop();
-            SweetAlert.show(context,
-                subtitle:
-                    "Sorry an error occured while uploading image, please try again.",
-                style: SweetAlertStyle.error);
           }
         } else {
           Navigator.of(context).pop();
@@ -1300,6 +1559,36 @@ class __addSceneDialogState extends State<_addSceneDialog> {
     try {
       CommonData sceneData =
           await scenesClass.registerUserScene(userId, sceneName, sceneImage);
+      if (sceneData.success == 1) {
+        return sceneData;
+      } else {
+        return sceneData;
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<CommonData> editUserScene(BuildContext context, String userId,
+      String sceneName, String sceneId, String sceneImage) async {
+    try {
+      CommonData sceneData = await scenesClass.editUserScene(
+          userId, sceneName, sceneId, sceneImage);
+      if (sceneData.success == 1) {
+        return sceneData;
+      } else {
+        return sceneData;
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<CommonData> deleteUserScene(BuildContext context, String userId,
+      String sceneName, String sceneId) async {
+    try {
+      CommonData sceneData =
+          await scenesClass.deleteUserScene(userId, sceneName, sceneId);
       if (sceneData.success == 1) {
         return sceneData;
       } else {
@@ -1546,36 +1835,58 @@ class __addRoomDialogState extends State<_addRoomDialog> {
                   height: 20.0,
                 ),
                 Container(
-                  width: double.maxFinite,
-                  alignment: Alignment.bottomRight,
-                  child: InkWell(
-                    onTap: () {
-                      validateRoomRegistration(context);
-                      // validateHubRegistration(context);
-                      // Navigator.pop(context);
-                    },
-                    child: FractionallySizedBox(
-                      widthFactor: 0.5,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.0),
-                            bottomRight: Radius.circular(4.0)),
-                        child: Container(
-                          padding: EdgeInsets.all(20.0),
-                          color: Color(0xFF222222),
-                          alignment: Alignment.center,
-                          child: Text('Submit'.toUpperCase(),
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  fontFamily: 'Montserrat',
-                                  letterSpacing: 1.0,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500)),
-                        ),
+                    width: double.maxFinite,
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      width: double.maxFinite,
+                      alignment: Alignment.bottomRight,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(20.0),
+                                alignment: Alignment.center,
+                                child: Text('Cancel'.toUpperCase(),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontFamily: 'Montserrat',
+                                        letterSpacing: 1.0,
+                                        color: Color(0xFF222222),
+                                        fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                validateRoomRegistration(context);
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(10.0),
+                                    bottomRight: Radius.circular(4.0)),
+                                child: Container(
+                                  padding: EdgeInsets.all(20.0),
+                                  color: Color(0xFF222222),
+                                  alignment: Alignment.center,
+                                  child: Text('Submit'.toUpperCase(),
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontFamily: 'Montserrat',
+                                          letterSpacing: 1.0,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                )
+                    ))
               ],
             ),
           ),
@@ -1712,5 +2023,160 @@ class __addRoomDialogState extends State<_addRoomDialog> {
     } catch (error) {
       print(error);
     }
+  }
+}
+
+class _helpDialog extends StatefulWidget {
+  @override
+  __helpDialogState createState() => __helpDialogState();
+}
+
+class __helpDialogState extends State<_helpDialog> {
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var contentPadding = EdgeInsets.symmetric(
+      vertical: SizeConfig.blockSizeVertical * 1,
+      horizontal: SizeConfig.blockSizeHorizontal * 5);
+
+  var bigContentPadding = EdgeInsets.symmetric(
+      vertical: SizeConfig.blockSizeVertical * 2,
+      horizontal: SizeConfig.blockSizeHorizontal * 5);
+
+  var contentText = TextStyle(
+      fontFamily: 'Montserrat',
+      fontSize: 14.0,
+      fontWeight: FontWeight.w500,
+      color: Colors.grey[800]);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: new AlertDialog(
+            contentPadding: EdgeInsets.all(0.0),
+            backgroundColor: Colors.white,
+            content: Container(
+              height: SizeConfig.blockSizeVertical * 80,
+              width: SizeConfig.blockSizeHorizontal * 80,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          vertical: SizeConfig.blockSizeVertical * 2,
+                          horizontal: SizeConfig.blockSizeHorizontal * 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Maskani Help Center',
+                            style: TextStyle(
+                                fontSize: 17.0,
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.w700),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 3,
+                                    offset: Offset(
+                                        0, 6), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              height: SizeConfig.blockSizeVertical * 4,
+                              width: SizeConfig.blockSizeVertical * 4,
+                              child: Icon(Icons.close),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              'Welcome to Maskani Smart Home Automation. To start up, you need to link you App '
+                              'to the Control hub. That is done by entering the Hub Code on the box to the form'
+                              ' that pops up and looks as shown below.',
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/hubRegiestration.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              'First, you need to create a scene. A scene is a period in which the hub will '
+                              'react in relation to the time set. If the time set equals the current time, the '
+                              'hub triggers the sensors and the devices attached according to the specifications set.'
+                              'To set up a scene, please Tap on the card shown below, it is the first car that '
+                              'you will see when you sign in for the first time. Fill in the form on the Popup by '
+                              'adding the scene name and attaching your favourite photo of the scene, click submit '
+                              'to save and the scene will be created, Tap the widget "Tap here to Refresh scenes" for '
+                              'you scene to appear, click the scene to edit the scene details. You can also swipe Left '
+                              'or Right to find your Scene card',
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/add_scene_screenshot.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              'Secondly, you need to add a room. To do this, drag the bottom black part of the Control Panel upwards to reveal the rooms Widget',
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/roomsWidget.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Text(
+                              "Click the 'ADD ROOM' to create a Room e.g. Living Room. Fill up the Pop Up form by adding a "
+                              "Room Name and Attach your Favourite Image of the room. Click Submit to save. You can now tap "
+                              "the Widget 'Tap Here to Refresh Rooms' and your newly created room will appear.",
+                              style: contentText),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )));
   }
 }

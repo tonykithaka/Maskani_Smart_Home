@@ -343,6 +343,7 @@ class _SceneSettingsState extends State<SceneSettings> {
             ),
             GestureDetector(
               onTap: () {
+                print('Air conditioner');
                 ConfigureDeviceDevice('Air Conditioner', arguments.sceneId);
               },
               child: Container(
@@ -555,7 +556,6 @@ class _SceneSettingsState extends State<SceneSettings> {
                                         child: Container(
                                           width: double.maxFinite,
                                           height: double.maxFinite,
-//                                    color: Color(0xFF292929),
                                           padding: EdgeInsets.symmetric(
                                               horizontal: SizeConfig
                                                       .blockSizeHorizontal *
@@ -607,7 +607,8 @@ class _SceneSettingsState extends State<SceneSettings> {
                                                             Container(
                                                               child: Text(
                                                                 arguments
-                                                                    .sceneName,
+                                                                    .sceneName
+                                                                    .toUpperCase(),
                                                                 style: TextStyle(
                                                                     fontFamily:
                                                                         'Montserrat',
@@ -858,6 +859,15 @@ class _SceneSettingsState extends State<SceneSettings> {
 }
 
 Widget _topBar(BuildContext context) {
+  Future<void> _dialogHelpCall(BuildContext context) {
+    return showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (BuildContext context) {
+          return _helpDialog();
+        });
+  }
+
   return Material(
     color: Colors.black.withOpacity(0),
     child: Container(
@@ -890,10 +900,180 @@ Widget _topBar(BuildContext context) {
                   Icons.help,
                   size: 18,
                 )),
-            onTap: () {},
+            onTap: () {
+              _dialogHelpCall(context);
+            },
           )
         ],
       ),
     ),
   );
+}
+
+class _helpDialog extends StatefulWidget {
+  @override
+  __helpDialogState createState() => __helpDialogState();
+}
+
+class __helpDialogState extends State<_helpDialog> {
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var contentPadding = EdgeInsets.symmetric(
+      vertical: SizeConfig.blockSizeVertical * 1,
+      horizontal: SizeConfig.blockSizeHorizontal * 5);
+
+  var bigContentPadding = EdgeInsets.symmetric(
+      vertical: SizeConfig.blockSizeVertical * 2,
+      horizontal: SizeConfig.blockSizeHorizontal * 5);
+
+  var contentText = TextStyle(
+      fontFamily: 'Montserrat',
+      fontSize: 14.0,
+      fontWeight: FontWeight.w500,
+      color: Colors.grey[800]);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: new AlertDialog(
+            contentPadding: EdgeInsets.all(0.0),
+            backgroundColor: Colors.white,
+            content: Container(
+              height: SizeConfig.blockSizeVertical * 80,
+              width: SizeConfig.blockSizeHorizontal * 80,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          vertical: SizeConfig.blockSizeVertical * 2,
+                          horizontal: SizeConfig.blockSizeHorizontal * 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Maskani Help Center',
+                            style: TextStyle(
+                                fontSize: 17.0,
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.w700),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 3,
+                                    offset: Offset(
+                                        0, 6), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              height: SizeConfig.blockSizeVertical * 4,
+                              width: SizeConfig.blockSizeVertical * 4,
+                              child: Icon(Icons.close),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              "First, you need to set your Scene to 'ACTIVE'. This will trigger the Hub to work according "
+                              "to the scene time set and all the sensors that have been attached to the room. To do this, "
+                              "flip the switch to set it to active",
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/sceneSwitch.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              "Next, you need to set the Time the Scene will Start and Stop. To do this, Tap on the Time, "
+                              "for the first time, the Time will be set to 00:00",
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/timeWidget.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              "Next, you click 'SAVE SETTINGS' button to save the time and the status for the scene "
+                              "for the conditions to be active. Click the button shown below.",
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/saveSettingsWidget.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                        ],
+                      ),
+                    ),
+                    Container(
+                        margin: contentPadding,
+                        height: 1.0,
+                        color: Color(0xFF222222)),
+                    Container(
+                      padding: contentPadding,
+                      child: Column(
+                        children: [
+                          Text(
+                              "Finally, you need to set up the sensors and triggers for the app to work. To do this, "
+                              "click on the 'Tap here to configure rooms and devices.'",
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/configureDeviceWidgets.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                          Text(
+                              "This will redirect you to the next screen where you click the desired device to configure. "
+                              "Select a device to configure by tapping the device name in the list shown below.",
+                              style: contentText),
+                          SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                          Image.asset('assets/deviceListWidget.png',
+                              width: SizeConfig.blockSizeHorizontal * 60),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )));
+  }
 }
