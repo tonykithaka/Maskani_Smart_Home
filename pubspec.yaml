@@ -39,6 +39,7 @@ dependencies:
   flutter_circular_slider: ^2.5.0
   image_picker: ^0.6.7+14
   dio: ^3.0.10
+  jwt_decoder: ^1.0.3
 
 
 

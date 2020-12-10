@@ -22,15 +22,19 @@ class _DeviceSettingsState extends State<DeviceSettings> {
   Color textColor = Color(0xFF333333);
 
   bool showWindow = false;
-  bool toggleValue = false;
+  bool toggleCurtainsValue = false;
   bool toggleLightsValue = false;
   String windowStatus;
   String lightsStatus;
-  String switchOne;
-  String switchTwo;
-  String switchThree;
+  bool switchOne = false;
+  bool switchTwo = false;
+  bool switchThree = false;
 
   var roomClass = Rooms();
+
+  String switchOneStatus;
+  String switchTwoStatus;
+  String switchThreeStatus;
 
   ShowContentContainer() {
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -80,23 +84,17 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     FetchRooms();
     ShowContentContainer();
     setInitTemperature();
-  }
-
-  void _shuffle() {
-    setState(() {
-      initTime = 20;
-      endTime = 30;
-      inBedTime = initTime;
-      outBedTime = endTime;
-    });
+    toggleCurtainsValue = false;
+    windowStatus = 'Closed';
+    lightsStatus = 'Closed';
   }
 
   setInitTemperature() {
     setState(() {
       initTime = 20;
       endTime = 30;
-      inBedTime = initTime;
-      outBedTime = endTime;
+      minTemp = initTime;
+      maxTemp = endTime;
     });
   }
 
@@ -187,8 +185,8 @@ class _DeviceSettingsState extends State<DeviceSettings> {
               height: SizeConfig.blockSizeVertical * 3,
             ),
             Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              _formatBedTime('MINIMUM', inBedTime),
-              _formatBedTime('MAXIMUM', outBedTime),
+              _formatTemperature('MINIMUM', minTemp),
+              _formatTemperature('MAXIMUM', maxTemp),
             ]),
           ],
         ),
@@ -244,7 +242,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                     Expanded(
                       flex: 1,
                       child: InkWell(
-                        onTap: toggleButton,
+                        onTap: toggleCurtainsButton,
                         child: AnimatedContainer(
                           duration: Duration(milliseconds: 500),
                           height: SizeConfig.blockSizeVertical * 7,
@@ -252,7 +250,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(
                                 SizeConfig.blockSizeVertical * 3.5),
-                            color: toggleValue
+                            color: toggleCurtainsValue
                                 ? Color(0xFF191919)
                                 : Color(0xFF191919),
                             boxShadow: [
@@ -271,13 +269,13 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                 duration: Duration(milliseconds: 300),
                                 curve: Curves.ease,
                                 top: SizeConfig.blockSizeVertical * 1,
-                                left: toggleValue
+                                left: toggleCurtainsValue
                                     ? SizeConfig.blockSizeHorizontal * 20
                                     : 0,
-                                right: toggleValue
+                                right: toggleCurtainsValue
                                     ? 0
                                     : SizeConfig.blockSizeHorizontal * 20,
-                                child: toggleValue
+                                child: toggleCurtainsValue
                                     ? Icon(
                                         Icons.check_circle_outline,
                                         color: Color(0xFFD4D4D4),
@@ -526,7 +524,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           ),
                         ),
                         InkWell(
-                          onTap: toggleLightsButton,
+                          onTap: toggleSwitchOneStatus,
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 500),
                             height: SizeConfig.blockSizeVertical * 7,
@@ -534,7 +532,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                   SizeConfig.blockSizeVertical * 3.5),
-                              color: toggleLightsValue
+                              color: switchOne
                                   ? Color(0xFF191919)
                                   : Color(0xFF191919),
                               boxShadow: [
@@ -553,13 +551,13 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   duration: Duration(milliseconds: 300),
                                   curve: Curves.ease,
                                   top: SizeConfig.blockSizeVertical * 1,
-                                  left: toggleLightsValue
+                                  left: switchOne
                                       ? SizeConfig.blockSizeHorizontal * 20
                                       : 0,
-                                  right: toggleLightsValue
+                                  right: switchOne
                                       ? 0
                                       : SizeConfig.blockSizeHorizontal * 20,
-                                  child: toggleLightsValue
+                                  child: switchOne
                                       ? Icon(
                                           Icons.check_circle_outline,
                                           color: Color(0xFFD4D4D4),
@@ -635,7 +633,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           ),
                         ),
                         InkWell(
-                          onTap: toggleLightsButton,
+                          onTap: toggleSwitchTwoStatus,
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 500),
                             height: SizeConfig.blockSizeVertical * 7,
@@ -643,7 +641,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                   SizeConfig.blockSizeVertical * 3.5),
-                              color: toggleLightsValue
+                              color: switchTwo
                                   ? Color(0xFF191919)
                                   : Color(0xFF191919),
                               boxShadow: [
@@ -662,13 +660,13 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   duration: Duration(milliseconds: 300),
                                   curve: Curves.ease,
                                   top: SizeConfig.blockSizeVertical * 1,
-                                  left: toggleLightsValue
+                                  left: switchTwo
                                       ? SizeConfig.blockSizeHorizontal * 20
                                       : 0,
-                                  right: toggleLightsValue
+                                  right: switchTwo
                                       ? 0
                                       : SizeConfig.blockSizeHorizontal * 20,
-                                  child: toggleLightsValue
+                                  child: switchTwo
                                       ? Icon(
                                           Icons.check_circle_outline,
                                           color: Color(0xFFD4D4D4),
@@ -744,7 +742,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                           ),
                         ),
                         InkWell(
-                          onTap: toggleLightsButton,
+                          onTap: toggleSwitchThreeStatus,
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 500),
                             height: SizeConfig.blockSizeVertical * 7,
@@ -752,7 +750,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                   SizeConfig.blockSizeVertical * 3.5),
-                              color: toggleLightsValue
+                              color: switchThree
                                   ? Color(0xFF191919)
                                   : Color(0xFF191919),
                               boxShadow: [
@@ -771,13 +769,13 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                   duration: Duration(milliseconds: 300),
                                   curve: Curves.ease,
                                   top: SizeConfig.blockSizeVertical * 1,
-                                  left: toggleLightsValue
+                                  left: switchThree
                                       ? SizeConfig.blockSizeHorizontal * 20
                                       : 0,
-                                  right: toggleLightsValue
+                                  right: switchThree
                                       ? 0
                                       : SizeConfig.blockSizeHorizontal * 20,
-                                  child: toggleLightsValue
+                                  child: switchThree
                                       ? Icon(
                                           Icons.check_circle_outline,
                                           color: Color(0xFFD4D4D4),
@@ -827,10 +825,10 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     );
   }
 
-  toggleButton() {
+  toggleCurtainsButton() {
     setState(() {
-      toggleValue = !toggleValue;
-      toggleValue ? windowStatus = 'Open' : windowStatus = 'Closed';
+      toggleCurtainsValue = !toggleCurtainsValue;
+      toggleCurtainsValue ? windowStatus = 'Open' : windowStatus = 'Closed';
     });
   }
 
@@ -841,19 +839,40 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     });
   }
 
+  toggleSwitchOneStatus() {
+    setState(() {
+      switchOne = !switchOne;
+      switchOne ? switchOneStatus = 'On' : switchOneStatus = 'Off';
+    });
+  }
+
+  toggleSwitchTwoStatus() {
+    setState(() {
+      switchTwo = !switchTwo;
+      switchTwo ? switchTwoStatus = 'On' : switchTwoStatus = 'Off';
+    });
+  }
+
+  toggleSwitchThreeStatus() {
+    setState(() {
+      switchThree = !switchThree;
+      switchThree ? switchThreeStatus = 'On' : switchThreeStatus = 'Off';
+    });
+  }
+
   final baseColor = Color.fromRGBO(255, 255, 255, 0.3);
 
   int initTime = 0;
   int endTime = 0;
 
-  int inBedTime;
-  int outBedTime;
+  int minTemp;
+  int maxTemp;
 
+  //Update temperature settings
   _updateLabels(int init, int end, int test) {
-    print(end);
     setState(() {
-      inBedTime = init;
-      outBedTime = end;
+      minTemp = init;
+      maxTemp = end;
     });
   }
 
@@ -897,7 +916,6 @@ class _DeviceSettingsState extends State<DeviceSettings> {
           alignedDropdown: true,
           child: DropdownButton(
             onTap: () {
-              print('Fetcing new rooms');
               setState(() {
                 _roomItems = null;
               });
@@ -994,7 +1012,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     );
   }
 
-  Widget _formatBedTime(String pre, int time) {
+  Widget _formatTemperature(String pre, int temp) {
     return Column(
       children: [
         Text(pre,
@@ -1006,7 +1024,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                 letterSpacing: 2.0)),
         SizedBox(height: SizeConfig.blockSizeVertical * 1),
         Text(
-          '${time}' + ' C',
+          '${temp}' + ' C',
           style: TextStyle(
               color: Color(0xFF222222),
               fontSize: 35.0,
@@ -1015,6 +1033,67 @@ class _DeviceSettingsState extends State<DeviceSettings> {
         )
       ],
     );
+  }
+
+  SaveDeviceSettings(DeviceSettingsData args) async {
+    final SharedPreferences prefs = await _prefs;
+    String userId = prefs.getString("user_id");
+    if ((selectedRoom == userId) || (selectedRoom == null)) {
+      SweetAlert.show(context,
+          subtitle: "Please select a room or create another.",
+          style: SweetAlertStyle.error);
+    }
+    switch (args.deviceTitle) {
+      case 'Air Conditioner':
+        {
+          if (this.minTemp > this.maxTemp) {
+            SweetAlert.show(context,
+                subtitle:
+                    "Minimum temperature cannot be greater than the maximum temperature.",
+                style: SweetAlertStyle.error);
+          }
+          print('Minimum temp is ' + minTemp.toString());
+          print('Maximum temp is ' + maxTemp.toString());
+          print('Scene ID is ' + args.sceneId.toString());
+          print('room id is ' + selectedRoom.toString());
+        }
+        break;
+
+      case 'Curtains':
+        {
+          print('Saving curtains');
+          print('Scene ID is ' + args.sceneId.toString());
+          print('room id is ' + selectedRoom.toString());
+          print('curtains are = $toggleCurtainsValue');
+        }
+        break;
+
+      case 'Lights':
+        {
+          print('Saving lights');
+          print('Scene ID is ' + args.sceneId.toString());
+          print('room id is ' + selectedRoom.toString());
+          print('lights are = $toggleLightsValue');
+        }
+        break;
+
+      case 'Power Outlets':
+        {
+          print('Saving power outlets');
+          print('Scene ID is ' + args.sceneId.toString());
+          print('room id is ' + selectedRoom.toString());
+          print('Switch One is = $switchOne');
+          print('Switch Two is = $switchTwo');
+          print('Switch Three is = $switchThree');
+        }
+        break;
+
+      default:
+        {
+          return null;
+        }
+        break;
+    }
   }
 
   @override
@@ -1091,7 +1170,9 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                                       topLeft: Radius.circular(20.0)),
                                 ),
                                 color: Color(0xFF191919),
-                                onPressed: () {},
+                                onPressed: () {
+                                  SaveDeviceSettings(args);
+                                },
                                 child: Text('SAVE SETTINGS',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(

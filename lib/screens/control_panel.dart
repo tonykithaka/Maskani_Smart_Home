@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:maskanismarthome/models/common.dart';
 import 'package:maskanismarthome/models/hubs.dart';
 import 'package:maskanismarthome/models/rooms.dart';
@@ -69,6 +70,17 @@ class _ControlPanelState extends State<ControlPanel> {
     super.initState();
     this.FetchHubDetails();
     getName('full_name');
+    checkToken();
+  }
+
+  checkToken() async {
+    final SharedPreferences prefs = await _prefs;
+    String token = prefs.getString("token");
+    bool hasExpired = JwtDecoder.isExpired(token);
+    if (hasExpired) {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      await preferences.clear();
+    }
   }
 
   Future<String> getName(String key) async {
@@ -2071,6 +2083,7 @@ class __helpDialogState extends State<_helpDialog> {
                           horizontal: SizeConfig.blockSizeHorizontal * 5),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             'Maskani Help Center',
