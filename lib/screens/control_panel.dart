@@ -138,8 +138,22 @@ class _ControlPanelState extends State<ControlPanel> {
         Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
         SweetAlert.show(context,
             subtitle: hubData.message, style: SweetAlertStyle.success);
-      } else {
-        print(hubData.message);
+      } else if (hubData.success == 0) {
+        Navigator.pop(context);
+        Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
+        // SweetAlert.show(context,
+        //     subtitle: hubData.message, style: SweetAlertStyle.error);
+
+        SweetAlert.show(context,
+            title: "Sorry!",
+            subtitle: hubData.message,
+            style: SweetAlertStyle.error,
+            showCancelButton: false, onPress: (bool isConfirm) {
+          if (isConfirm) {
+            FetchHubDetails();
+            return false;
+          }
+        });
       }
     } catch (error) {
       print(error);

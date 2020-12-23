@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maskanismarthome/models/common.dart';
+import 'package:maskanismarthome/models/powerDevices.dart';
 import 'package:maskanismarthome/models/rooms.dart';
+import 'package:maskanismarthome/models/temperature.dart';
 import 'package:maskanismarthome/repository/RoomsRepo.dart';
+import 'package:maskanismarthome/repository/devices/PowerDeviceSettings.dart';
+import 'package:maskanismarthome/repository/devices/TemperatureSettings.dart';
 import 'package:maskanismarthome/style/size_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sweetalert/sweetalert.dart';
@@ -30,11 +34,22 @@ class _DeviceSettingsState extends State<DeviceSettings> {
   bool switchTwo = false;
   bool switchThree = false;
 
+  int initTemp = 0;
+  int endTemp = 0;
+
+  int minTemp;
+  int maxTemp;
+
   var roomClass = Rooms();
+  var powerDevicesClass = PowerDeviceSettings();
+  var temperatureSettingsClass = TemperatureSettings();
 
   String switchOneStatus;
   String switchTwoStatus;
   String switchThreeStatus;
+
+  List<Room> _roomItems;
+  List<PowerSetting> _powerSettings;
 
   ShowContentContainer() {
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -83,18 +98,145 @@ class _DeviceSettingsState extends State<DeviceSettings> {
     super.initState();
     FetchRooms();
     ShowContentContainer();
+    FetchPowerDeviceSettings();
+    FetchTemperatureSettings();
     setInitTemperature();
     toggleCurtainsValue = false;
     windowStatus = 'Closed';
     lightsStatus = 'Closed';
   }
 
+  Future<void> FetchTemperatureSettings() async {
+    final SharedPreferences prefs = await _prefs;
+    final DeviceSettingsData args = ModalRoute.of(context).settings.arguments;
+    String sceneId = args.sceneId.toString();
+    try {
+      TemperatureInfo temperatureInfo =
+          await temperatureSettingsClass.FetchTemperatureSettings(sceneId);
+      setState(() {
+        initTemp = temperatureInfo.temperatureSettings[0].minimumTemp;
+        endTemp = temperatureInfo.temperatureSettings[0].maximumTemp;
+        minTemp = temperatureInfo.temperatureSettings[0].minimumTemp;
+        maxTemp = temperatureInfo.temperatureSettings[0].maximumTemp;
+      });
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<void> UpdateTemperatureSettings(
+      String sceneId, int minTemp, maxTemp) async {
+    try {
+      CommonData temperatureInfo = await temperatureSettingsClass
+          .updateTemperatureSettings(sceneId, minTemp, maxTemp);
+      if (temperatureInfo.success == 1) {
+        SweetAlert.show(context,
+            subtitle: temperatureInfo.message, style: SweetAlertStyle.success);
+      } else {
+        SweetAlert.show(context,
+            subtitle: temperatureInfo.message, style: SweetAlertStyle.error);
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<void> FetchPowerDeviceSettings() async {
+    final SharedPreferences prefs = await _prefs;
+    final DeviceSettingsData args = ModalRoute.of(context).settings.arguments;
+    String sceneId = args.sceneId.toString();
+    print("Scene id is :: " + sceneId);
+    try {
+      PowerInfo powerDeviceData =
+          await powerDevicesClass.FetchPowerDeviceSettings(sceneId);
+      setState(() {
+        _powerSettings = powerDeviceData.powerSetting;
+      });
+      //Set state for power devices
+      if (_powerSettings[0].powerSwitchOne == "true") {
+        setState(() {
+          switchOne = true;
+        });
+      } else {
+        setState(() {
+          switchOne = false;
+        });
+      }
+      if (_powerSettings[0].powerSwitchTwo == "true") {
+        setState(() {
+          switchTwo = true;
+        });
+      } else {
+        setState(() {
+          switchTwo = false;
+        });
+      }
+      if (_powerSettings[0].powerSwitchThree == "true") {
+        setState(() {
+          switchThree = true;
+        });
+      } else {
+        setState(() {
+          switchThree = false;
+        });
+      }
+
+      //set state for curtains
+      if (_powerSettings[0].lightSwitch == "true") {
+        setState(() {
+          toggleLightsValue = true;
+        });
+      } else {
+        setState(() {
+          toggleLightsValue = false;
+        });
+      }
+
+      //set state for curtains
+      if (_powerSettings[0].curtainSwitch == "true") {
+        setState(() {
+          toggleCurtainsValue = true;
+        });
+      } else {
+        setState(() {
+          toggleCurtainsValue = false;
+        });
+      }
+      if (_roomItems.length == 1) {
+        _dialogRoomCall(context);
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<void> UpdatePowerDeviceSettings(
+      String sceneId,
+      bool switchOne,
+      bool switchTwo,
+      bool switchThree,
+      bool toggleLightsValue,
+      bool toggleCurtainsValue) async {
+    try {
+      CommonData temperatureInfo =
+          await powerDevicesClass.updatePowerDevicesSettings(sceneId, switchOne,
+              switchTwo, switchThree, toggleLightsValue, toggleCurtainsValue);
+      if (temperatureInfo.success == 1) {
+        SweetAlert.show(context,
+            subtitle: temperatureInfo.message, style: SweetAlertStyle.success);
+      } else {
+        SweetAlert.show(context,
+            subtitle: temperatureInfo.message, style: SweetAlertStyle.error);
+      }
+    } catch (error) {
+      print(error);
+    }
+  }
+
   setInitTemperature() {
     setState(() {
-      initTime = 20;
-      endTime = 30;
-      minTemp = initTime;
-      maxTemp = endTime;
+      minTemp = initTemp;
+      maxTemp = endTemp;
     });
   }
 
@@ -135,7 +277,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
             ),
             Container(
               padding: EdgeInsets.all(20.0),
-              child: DoubleCircularSlider(50, initTime, endTime,
+              child: DoubleCircularSlider(50, initTemp, endTemp,
                   height: 300.0,
                   width: 300.0,
                   baseColor: Color(0xFF333333),
@@ -597,7 +739,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                     Container(
                       width: double.maxFinite,
                       height: 1.0,
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.grey.withOpacity(0.5),
                     ),
                     SizedBox(
                       height: SizeConfig.blockSizeVertical * 4,
@@ -706,7 +848,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                     Container(
                       width: double.maxFinite,
                       height: 1.0,
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.grey.withOpacity(0.5),
                     ),
                     SizedBox(
                       height: SizeConfig.blockSizeVertical * 4,
@@ -815,7 +957,7 @@ class _DeviceSettingsState extends State<DeviceSettings> {
                     Container(
                       width: double.maxFinite,
                       height: 1.0,
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.grey.withOpacity(0.5),
                     )
                   ],
                 )),
@@ -862,12 +1004,6 @@ class _DeviceSettingsState extends State<DeviceSettings> {
 
   final baseColor = Color.fromRGBO(255, 255, 255, 0.3);
 
-  int initTime = 0;
-  int endTime = 0;
-
-  int minTemp;
-  int maxTemp;
-
   //Update temperature settings
   _updateLabels(int init, int end, int test) {
     setState(() {
@@ -875,8 +1011,6 @@ class _DeviceSettingsState extends State<DeviceSettings> {
       maxTemp = end;
     });
   }
-
-  List<Room> _roomItems;
 
   Future<List<Room>> FetchRooms() async {
     final SharedPreferences prefs = await _prefs;
@@ -1056,6 +1190,8 @@ class _DeviceSettingsState extends State<DeviceSettings> {
           print('Maximum temp is ' + maxTemp.toString());
           print('Scene ID is ' + args.sceneId.toString());
           print('room id is ' + selectedRoom.toString());
+
+          UpdateTemperatureSettings(args.sceneId.toString(), minTemp, maxTemp);
         }
         break;
 
@@ -1065,6 +1201,13 @@ class _DeviceSettingsState extends State<DeviceSettings> {
           print('Scene ID is ' + args.sceneId.toString());
           print('room id is ' + selectedRoom.toString());
           print('curtains are = $toggleCurtainsValue');
+          print('lights are = $toggleLightsValue');
+          print('switchOne are = $switchOne');
+          print('switchOne are = $switchTwo');
+          print('switchOne are = $switchThree');
+
+          UpdatePowerDeviceSettings(args.sceneId.toString(), switchOne,
+              switchTwo, switchThree, toggleLightsValue, toggleCurtainsValue);
         }
         break;
 
@@ -1073,7 +1216,14 @@ class _DeviceSettingsState extends State<DeviceSettings> {
           print('Saving lights');
           print('Scene ID is ' + args.sceneId.toString());
           print('room id is ' + selectedRoom.toString());
+          print('curtains are = $toggleCurtainsValue');
           print('lights are = $toggleLightsValue');
+          print('switchOne are = $switchOne');
+          print('switchOne are = $switchTwo');
+          print('switchOne are = $switchThree');
+
+          UpdatePowerDeviceSettings(args.sceneId.toString(), switchOne,
+              switchTwo, switchThree, toggleLightsValue, toggleCurtainsValue);
         }
         break;
 
@@ -1082,9 +1232,14 @@ class _DeviceSettingsState extends State<DeviceSettings> {
           print('Saving power outlets');
           print('Scene ID is ' + args.sceneId.toString());
           print('room id is ' + selectedRoom.toString());
-          print('Switch One is = $switchOne');
-          print('Switch Two is = $switchTwo');
-          print('Switch Three is = $switchThree');
+          print('curtains are = $toggleCurtainsValue');
+          print('lights are = $toggleLightsValue');
+          print('switchOne are = $switchOne');
+          print('switchOne are = $switchTwo');
+          print('switchOne are = $switchThree');
+
+          UpdatePowerDeviceSettings(args.sceneId.toString(), switchOne,
+              switchTwo, switchThree, toggleLightsValue, toggleCurtainsValue);
         }
         break;
 
